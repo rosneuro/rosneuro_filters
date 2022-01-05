@@ -50,38 +50,32 @@ add_definitions(${EIGEN3_DEFINITIONS})
 ## Plugin
 
 # CAR Spatial filter
-add_library(${PROJECT_NAME}_car include/${PROJECT_NAME}/Car.hpp)
-set_target_properties(${PROJECT_NAME}_car PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_car src/Car.cpp)
 target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_car ${catkin_EXPORTED_TARGETS})
 
 # DC Spatial filter
-add_library(${PROJECT_NAME}_dc include/${PROJECT_NAME}/Dc.hpp)
-set_target_properties(${PROJECT_NAME}_dc PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_dc src/Dc.cpp)
 target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_dc ${catkin_EXPORTED_TARGETS})
 
 # Hann Window
-add_library(${PROJECT_NAME}_hann include/${PROJECT_NAME}/Hann.hpp)
-set_target_properties(${PROJECT_NAME}_hann PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_hann src/Hann.cpp)
 target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_hann ${catkin_EXPORTED_TARGETS})
 
 # Hamming Window
-add_library(${PROJECT_NAME}_hamming include/${PROJECT_NAME}/Hamming.hpp)
-set_target_properties(${PROJECT_NAME}_hamming PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_hamming src/Hamming.cpp)
 target_link_libraries(${PROJECT_NAME}_hamming ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_hamming ${catkin_EXPORTED_TARGETS})
 
 # Flattop Window
-add_library(${PROJECT_NAME}_flattop include/${PROJECT_NAME}/Flattop.hpp)
-set_target_properties(${PROJECT_NAME}_flattop PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_flattop src/Flattop.cpp)
 target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_flattop ${catkin_EXPORTED_TARGETS})
 
 # Blackman Window
-add_library(${PROJECT_NAME}_blackman include/${PROJECT_NAME}/Blackman.hpp)
-set_target_properties(${PROJECT_NAME}_blackman PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME}_blackman src/Blackman.cpp)
 target_link_libraries(${PROJECT_NAME}_blackman ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}_blackman ${catkin_EXPORTED_TARGETS})
 
@@ -90,19 +84,22 @@ add_dependencies(${PROJECT_NAME}_blackman ${catkin_EXPORTED_TARGETS})
 #################
 
 add_executable(test_car test/test_car.cpp)
-target_link_libraries(test_car ${PROJECT_NAME}_car)
+target_link_libraries(test_car ${PROJECT_NAME}_car ${catkin_LIBRARIES})
 
 add_executable(test_dc test/test_dc.cpp)
-target_link_libraries(test_dc ${PROJECT_NAME}_dc)
+target_link_libraries(test_dc ${PROJECT_NAME}_dc ${catkin_LIBRARIES})
 
 add_executable(test_hann test/test_hann.cpp)
-target_link_libraries(test_hann ${PROJECT_NAME}_hann)
+target_link_libraries(test_hann ${PROJECT_NAME}_hann ${catkin_LIBRARIES})
 
 add_executable(test_hamming test/test_hamming.cpp)
-target_link_libraries(test_hamming ${PROJECT_NAME}_hamming)
+target_link_libraries(test_hamming ${PROJECT_NAME}_hamming ${catkin_LIBRARIES})
 
 add_executable(test_flattop test/test_flattop.cpp)
-target_link_libraries(test_flattop ${PROJECT_NAME}_flattop)
+target_link_libraries(test_flattop ${PROJECT_NAME}_flattop ${catkin_LIBRARIES})
 
 add_executable(test_blackman test/test_blackman.cpp)
-target_link_libraries(test_blackman ${PROJECT_NAME}_blackman)
+target_link_libraries(test_blackman ${PROJECT_NAME}_blackman ${catkin_LIBRARIES})
+
+add_executable(test_chain test/test_chain.cpp)
+target_link_libraries(test_chain ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 

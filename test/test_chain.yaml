@@ -1,0 +1,5 @@
+ChainCfgTest:
+    - name: dc
+      type: rosneuro_filters/DcFilterFloat
+    - name: car
+      type: rosneuro_filters/CarFilterFloat

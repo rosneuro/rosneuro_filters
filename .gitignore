@@ -1,3 +1,6 @@
+# Gvim
+*.swp
+
 # Prerequisites
 *.d
 
