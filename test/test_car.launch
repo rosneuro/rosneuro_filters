@@ -1,0 +1,4 @@
+<launch>	
+	<rosparam command="load" file="$(find rosneuro_filters)/test/test_car.yaml"/>
+	<node name="test_car" pkg="rosneuro_filters" type="test_car" output="screen"/>
+</launch>

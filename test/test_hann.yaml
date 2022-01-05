@@ -1,0 +1,4 @@
+HannCfgTest:
+  name: hann
+  type: HannWindowFloat
+  params: {nsamples: 4}

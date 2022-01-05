@@ -1,0 +1,4 @@
+<launch>	
+	<rosparam command="load" file="$(find rosneuro_filters)/test/test_blackman.yaml"/>
+	<node name="test_blackman" pkg="rosneuro_filters" type="test_blackman" output="screen"/>
+</launch>

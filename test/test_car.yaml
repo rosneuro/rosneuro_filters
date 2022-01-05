@@ -1,0 +1,3 @@
+CarCfgTest:
+  name: car
+  type: CarFilterFloat
