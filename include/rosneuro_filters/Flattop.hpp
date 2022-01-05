@@ -3,7 +3,6 @@
 
 #include <Eigen/Dense>
 #include "rosneuro_filters/Filter.hpp"
-#include "pluginlib/class_list_macros.h"
   
 namespace rosneuro {
 
@@ -81,9 +80,5 @@ bool Flattop<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) {
 }
 
 }
-
-PLUGINLIB_EXPORT_CLASS(rosneuro::Flattop<int>,    rosneuro::Filter<int>)
-PLUGINLIB_EXPORT_CLASS(rosneuro::Flattop<float>,  rosneuro::Filter<float>)
-PLUGINLIB_EXPORT_CLASS(rosneuro::Flattop<double>, rosneuro::Filter<double>)
 
 #endif

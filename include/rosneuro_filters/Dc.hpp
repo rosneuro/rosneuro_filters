@@ -3,7 +3,6 @@
 
 #include <Eigen/Dense>
 #include "rosneuro_filters/Filter.hpp"
-#include "pluginlib/class_list_macros.h"
   
 namespace rosneuro {
 
