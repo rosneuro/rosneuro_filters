@@ -25,6 +25,8 @@ class FilterChain {
 		bool configured_;
 		std::vector<boost::shared_ptr<rosneuro::Filter<T>>> procs_;
 		pluginlib::ClassLoader<rosneuro::Filter<T> > loader_;
+		NeuroData<T> buffer0_;
+		NeuroData<T> buffer1_;
 
 };
 
@@ -62,10 +64,21 @@ bool FilterChain<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) 
 
 	unsigned int nprocs = this->procs_.size();
 
-	for(auto it=this->procs_.begin(); it != this->procs_.end(); ++it) {
-		ROS_INFO("Applying filter '%s'", (*it)->name());
-	}
+	if(nprocs == 0) {
+		data_out = data_in;
+	} else {
 
+		this->buffer0_ = data_in;
+		this->buffer1_ = data_out;
+
+		for(auto it=this->procs_.begin(); it != this->procs_.end(); ++it) {
+			ROS_INFO("Applying filter '%s'", (*it)->name().c_str());
+			(*it)->apply(this->buffer0_, this->buffer1_);
+			this->buffer0_ = this->buffer1_;
+		}
+
+		data_out = this->buffer1_;
+	}
 	return true;
 
 }

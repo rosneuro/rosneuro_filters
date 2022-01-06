@@ -14,7 +14,7 @@ class Filter {
 		Filter(void) : configured_(false) {};
 		virtual ~Filter(void) {};
 
-		bool configure(const std::string& param_name, ros::NodeHandle nh = ros::NodeHandle());
+		bool configure(const std::string& param_name);
 		bool configure(XmlRpc::XmlRpcValue& config);
 		std::string type(void) const;
 		std::string name(void) const;
@@ -42,6 +42,7 @@ class Filter {
 
 	private:
 		bool setNameAndType(XmlRpc::XmlRpcValue& config);
+		ros::NodeHandle nh_;
 };
 
 
@@ -76,20 +77,24 @@ bool Filter<T>::setNameAndType(XmlRpc::XmlRpcValue& config) {
 }
 
 template<typename T>
-bool Filter<T>::configure(const std::string& param_name, ros::NodeHandle nh) {
+bool Filter<T>::configure(const std::string& param_name) {
 	
+	bool retval = false;
 	XmlRpc::XmlRpcValue config;
-	if (!nh.getParam(param_name, config)) {
+	if (!this->nh_.getParam(param_name, config)) {
   		ROS_ERROR("Could not find parameter %s on the server, are you sure that it was pushed up correctly?", param_name.c_str());
 		return false;
 	}
-	return this->configure(config);
+
+	retval = this->configure(config);
+	ROS_INFO("qui2");
+	return retval;
 }
 
 template<typename T>
 bool Filter<T>::configure(XmlRpc::XmlRpcValue& config) {
 	if (configured_) {
-		ROS_WARN("Filter %s of type %s already being reconfigured", this->name_.c_str(), this->type_.c_str());
+		ROS_ERROR("Filter %s of type %s already being reconfigured", this->name_.c_str(), this->type_.c_str());
 	}
 	this->configured_ = false;
 	bool retval = true;
@@ -97,6 +102,7 @@ bool Filter<T>::configure(XmlRpc::XmlRpcValue& config) {
 	retval = retval && this->loadConfiguration(config);
 	retval = retval && this->configure();
 	configured_ = retval;
+	ROS_INFO("qui1");
 	return retval;
 }
 
@@ -108,8 +114,9 @@ bool Filter<T>::loadConfiguration(XmlRpc::XmlRpcValue& config) {
 		return false;
 	} 
   
-	if (!setNameAndType(config))
+	if (!setNameAndType(config)) {
 		return false;
+	}
 
 	//check to see if we have parameters in our list
 	if(config.hasMember("params")) {
@@ -124,7 +131,7 @@ bool Filter<T>::loadConfiguration(XmlRpc::XmlRpcValue& config) {
     	
 			//Load params into map
     		for(XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it) {
-      			ROS_DEBUG("Loading param %s\n", it->first.c_str());
+      			ROS_DEBUG("Loading param %s", it->first.c_str());
       			this->params_[it->first] = it->second;
 			}
 		}

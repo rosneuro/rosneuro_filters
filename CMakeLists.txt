@@ -10,6 +10,8 @@ set(ROSNEURO_DATA_MIN_VERSION "1.0.0")
 
 find_package(catkin REQUIRED COMPONENTS 
 			 roscpp 
+			 roslib
+			 rosconsole
 			 std_msgs
 			 pluginlib
 			 rosneuro_data
@@ -30,9 +32,17 @@ include_directories(${catkin_INCLUDE_DIRS}
 ##############################################################################
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}_car ${PROJECT_NAME}_dc
+  LIBRARIES 
+  	${PROJECT_NAME}_car 
+	${PROJECT_NAME}_dc
+	${PROJECT_NAME}_hann
+	${PROJECT_NAME}_hamming
+	${PROJECT_NAME}_blackman
+	${PROJECT_NAME}_flattop
   CATKIN_DEPENDS
   	roscpp
+	roslib
+	rosconsole
 	std_msgs
 	pluginlib
 	rosneuro_data
@@ -52,32 +62,26 @@ add_definitions(${EIGEN3_DEFINITIONS})
 # CAR Spatial filter
 add_library(${PROJECT_NAME}_car src/Car.cpp)
 target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_car ${catkin_EXPORTED_TARGETS})
 
 # DC Spatial filter
 add_library(${PROJECT_NAME}_dc src/Dc.cpp)
 target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_dc ${catkin_EXPORTED_TARGETS})
 
 # Hann Window
 add_library(${PROJECT_NAME}_hann src/Hann.cpp)
 target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_hann ${catkin_EXPORTED_TARGETS})
 
 # Hamming Window
 add_library(${PROJECT_NAME}_hamming src/Hamming.cpp)
 target_link_libraries(${PROJECT_NAME}_hamming ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_hamming ${catkin_EXPORTED_TARGETS})
 
 # Flattop Window
 add_library(${PROJECT_NAME}_flattop src/Flattop.cpp)
 target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_flattop ${catkin_EXPORTED_TARGETS})
 
 # Blackman Window
 add_library(${PROJECT_NAME}_blackman src/Blackman.cpp)
 target_link_libraries(${PROJECT_NAME}_blackman ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_blackman ${catkin_EXPORTED_TARGETS})
 
 #################
 ## Executables ##
@@ -103,3 +107,6 @@ target_link_libraries(test_blackman ${PROJECT_NAME}_blackman ${catkin_LIBRARIES}
 
 add_executable(test_chain test/test_chain.cpp)
 target_link_libraries(test_chain ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
+
+add_executable(test test/test.cpp)
+target_link_libraries(test ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 

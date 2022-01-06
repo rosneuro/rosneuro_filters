@@ -23,7 +23,8 @@
   <exec_depend>pluginlib</exec_depend>
   
   <export>
-    <rosneuro_filters plugin="${prefix}/default_plugins.xml" />
+    <rosneuro_filters plugin="${prefix}/plugins_spatialfilters.xml" />
+    <rosneuro_filters plugin="${prefix}/plugins_windows.xml" />
   </export>
 
 </package>

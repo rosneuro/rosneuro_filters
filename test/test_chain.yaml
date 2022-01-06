@@ -3,3 +3,9 @@ ChainCfgTest:
       type: rosneuro_filters/DcFilterFloat
     - name: car
       type: rosneuro_filters/CarFilterFloat
+    - name: hann
+      type: rosneuro_filters/HannWindowFloat
+      params: {nsamples: 4}
+    - name: flattop
+      type: rosneuro_filters/FlattopWindowFloat
+      params: {nsamples: 4}

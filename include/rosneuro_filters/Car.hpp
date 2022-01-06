@@ -20,6 +20,7 @@ class Car : public Filter<T> {
 
 template<typename T>
 bool Car<T>::configure(void) {
+	ROS_INFO("qui");
 	return true;
 }
 
