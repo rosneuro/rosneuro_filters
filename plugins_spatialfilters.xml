@@ -32,4 +32,20 @@
       <description>Dc filter with ints</description>
     </class>
   </library>
+  <library path="lib/librosneuro_filters_laplacian">
+    <class name="rosneuro_filters/LaplacianFilterDouble" type="rosneuro::Laplacian<double>"
+        base_class_type="rosneuro::Filter<double>">
+      <description>Laplacian filter with doubles</description>
+    </class>
+    
+    <class name="rosneuro_filters/LaplacianFilterFloat" type="rosneuro::Laplacian<float>"
+        base_class_type="rosneuro::Filter<float>">
+      <description>Laplacian filter with floats</description>
+    </class>
+    
+    <class name="rosneuro_filters/LaplacianFilterInt" type="rosneuro::Laplacian<int>"
+        base_class_type="rosneuro::Filter<int>">
+      <description>Laplacian filter with ints</description>
+    </class>
+  </library>
 </class_libraries> 

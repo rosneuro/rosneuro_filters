@@ -87,7 +87,6 @@ bool Filter<T>::configure(const std::string& param_name) {
 	}
 
 	retval = this->configure(config);
-	ROS_INFO("qui2");
 	return retval;
 }
 
@@ -102,7 +101,6 @@ bool Filter<T>::configure(XmlRpc::XmlRpcValue& config) {
 	retval = retval && this->loadConfiguration(config);
 	retval = retval && this->configure();
 	configured_ = retval;
-	ROS_INFO("qui1");
 	return retval;
 }
 

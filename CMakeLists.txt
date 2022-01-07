@@ -35,6 +35,7 @@ catkin_package(
   LIBRARIES 
   	${PROJECT_NAME}_car 
 	${PROJECT_NAME}_dc
+	${PROJECT_NAME}_laplacian
 	${PROJECT_NAME}_hann
 	${PROJECT_NAME}_hamming
 	${PROJECT_NAME}_blackman
@@ -66,6 +67,10 @@ target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} ${catkin_LIBRARIES
 # DC Spatial filter
 add_library(${PROJECT_NAME}_dc src/Dc.cpp)
 target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+
+# Laplacian Spatial filter
+add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
+target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
 
 # Hann Window
 add_library(${PROJECT_NAME}_hann src/Hann.cpp)
@@ -107,6 +112,9 @@ target_link_libraries(test_blackman ${PROJECT_NAME}_blackman ${catkin_LIBRARIES}
 
 add_executable(test_chain test/test_chain.cpp)
 target_link_libraries(test_chain ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
+
+add_executable(test_laplacian test/test_laplacian.cpp)
+target_link_libraries(test_laplacian ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
 
 add_executable(test test/test.cpp)
 target_link_libraries(test ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
