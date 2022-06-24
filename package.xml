@@ -17,6 +17,7 @@
   <depend>rosneuro_msgs</depend>
   <exec_depend>message_runtime</exec_depend>
   <depend>eigen</depend>
+  <depend>librtfilter</depend>
   <depend>roslib</depend>
   <depend>rosconsole</depend>
   <build_depend>pluginlib</build_depend>
@@ -24,6 +25,7 @@
   
   <export>
     <rosneuro_filters plugin="${prefix}/plugins_spatialfilters.xml" />
+    <rosneuro_filters plugin="${prefix}/plugins_frequencyfilters.xml" />
     <rosneuro_filters plugin="${prefix}/plugins_windows.xml" />
   </export>
 

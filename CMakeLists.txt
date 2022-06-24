@@ -19,15 +19,19 @@ find_package(catkin REQUIRED COMPONENTS
 		 find_package(rosneuro_data ${ROSNEURO_DATA_MIN_VERSION} REQUIRED)
 
 find_package(Eigen3 REQUIRED)
+find_library(RTF_LIBRARIES rtfilter)
+find_path(RTF_INCLUDE_DIRS rtfilter.h)
+
 find_package(PkgConfig)
 
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 include_directories(${catkin_INCLUDE_DIRS} 
                     ${EIGEN3_INCLUDE_DIRS}
+					${RTF_INCLUDE_DIRS}
 					include)
 
-				##############################################################################
+##############################################################################
 # Define package
 ##############################################################################
 catkin_package(
@@ -36,6 +40,7 @@ catkin_package(
   	${PROJECT_NAME}_car 
 	${PROJECT_NAME}_dc
 	${PROJECT_NAME}_laplacian
+	${PROJECT_NAME}_butterworth
 	${PROJECT_NAME}_hann
 	${PROJECT_NAME}_hamming
 	${PROJECT_NAME}_blackman
@@ -71,6 +76,10 @@ target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} ${catkin_LIBRARIES}
 # Laplacian Spatial filter
 add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
 target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+
+# Butterworth frequency filter
+add_library(${PROJECT_NAME}_butterworth src/Butterworth.cpp)
+target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES} ${RTF_LIBRARIES} ${catkin_LIBRARIES})
 
 # Hann Window
 add_library(${PROJECT_NAME}_hann src/Hann.cpp)
@@ -115,6 +124,9 @@ target_link_libraries(test_chain ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin
 
 add_executable(test_laplacian test/test_laplacian.cpp)
 target_link_libraries(test_laplacian ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
+
+add_executable(test_butterworth test/test_butterworth.cpp)
+target_link_libraries(test_butterworth ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
 
 #add_executable(test test/test.cpp)
 #target_link_libraries(test ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 

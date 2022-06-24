@@ -1,0 +1,4 @@
+<launch>	
+	<rosparam command="load" file="$(find rosneuro_filters)/test/test_butterworth.yaml"/>
+	<node name="test_butterworth" pkg="rosneuro_filters" type="test_butterworth" output="screen"/>
+</launch>
