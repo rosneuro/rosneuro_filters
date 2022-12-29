@@ -130,3 +130,18 @@ target_link_libraries(test_butterworth ${PROJECT_NAME}_butterworth ${catkin_LIBR
 
 #add_executable(test test/test.cpp)
 #target_link_libraries(test ${PROJECT_NAME}_car ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
+
+#################
+##   Install   ##
+#################
+install(TARGETS ${PROJECT_NAME}_car
+				${PROJECT_NAME}_dc
+				${PROJECT_NAME}_laplacian
+				${PROJECT_NAME}_butterworth
+				${PROJECT_NAME}_hann
+				${PROJECT_NAME}_hamming
+				${PROJECT_NAME}_flattop
+				${PROJECT_NAME}_blackman
+	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
