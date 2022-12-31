@@ -67,35 +67,52 @@ add_definitions(${EIGEN3_DEFINITIONS})
 
 # CAR Spatial filter
 add_library(${PROJECT_NAME}_car src/Car.cpp)
-target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} 
+										  ${catkin_LIBRARIES}
+)
 
 # DC Spatial filter
 add_library(${PROJECT_NAME}_dc src/Dc.cpp)
-target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} 
+										 ${catkin_LIBRARIES}
+)
 
 # Laplacian Spatial filter
 add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
-target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} 
+												${catkin_LIBRARIES}
+)
 
 # Butterworth frequency filter
 add_library(${PROJECT_NAME}_butterworth src/Butterworth.cpp)
-target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES} ${RTF_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES} 
+												  ${RTF_LIBRARIES} 
+												  ${catkin_LIBRARIES}
+)
 
 # Hann Window
 add_library(${PROJECT_NAME}_hann src/Hann.cpp)
-target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} 
+										   ${catkin_LIBRARIES}
+)
 
 # Hamming Window
 add_library(${PROJECT_NAME}_hamming src/Hamming.cpp)
-target_link_libraries(${PROJECT_NAME}_hamming ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_hamming ${Eigen3_LIBRARIES} 
+											  ${catkin_LIBRARIES}
+)
 
 # Flattop Window
 add_library(${PROJECT_NAME}_flattop src/Flattop.cpp)
-target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} 
+											  ${catkin_LIBRARIES}
+)
 
 # Blackman Window
 add_library(${PROJECT_NAME}_blackman src/Blackman.cpp)
-target_link_libraries(${PROJECT_NAME}_blackman ${Eigen3_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_blackman ${Eigen3_LIBRARIES} 
+											   ${catkin_LIBRARIES}
+)
 
 #################
 ## Executables ##
