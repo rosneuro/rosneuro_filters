@@ -162,3 +162,8 @@ install(TARGETS ${PROJECT_NAME}_car
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
+install(FILES plugins_frequencyfilters.xml
+			  plugins_spatialfilters.xml
+			  plugins_windows.xml
+	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
