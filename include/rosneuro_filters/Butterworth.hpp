@@ -28,8 +28,8 @@ class Butterworth: public Filter<T> {
 	private:
 		unsigned int order_;
 		unsigned int nchannels_;
-		unsigned int samplerate_;
-		unsigned int cutoff_;
+		double 		 samplerate_;
+		double 		 cutoff_;
 		unsigned int type_;
 		hfilter 	 filt_ = nullptr;
 };
@@ -109,6 +109,7 @@ bool Butterworth<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) 
 	unsigned int ns_out = data_out.nsamples();
 	unsigned int nc_out = data_out.nchannels();
 
+
 	if(ns_in != ns_out) {
 		ROS_ERROR("[Butterworth] Different number of samples between data in and data out");
 		return false;
@@ -120,7 +121,7 @@ bool Butterworth<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) 
 	}
 
 	rtf_filter(this->filt_, p_in, p_out, ns_in);
-
+	
 	return true;
 }
 
