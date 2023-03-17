@@ -74,21 +74,47 @@ int main(int argc, char** argv) {
 	// Allocate frame data (for simulating online loop) 	
 	rosneuro::DynamicMatrix<double> framedata = rosneuro::DynamicMatrix<double>::Zero(framesize, nchannels);
 
+	// Allocate time variables
+	ros::WallTime start_lp, stop_lp, start_hp, stop_hp, start_bp, stop_bp;
+	ros::WallTime start_loop, stop_loop;
+	Eigen::VectorXd time_lp(nsamples/framesize);
+	Eigen::VectorXd time_hp(nsamples/framesize); 
+	Eigen::VectorXd time_bp(nsamples/framesize);
+	
 	// Start iteration for simulating online loop
-	ros::WallTime lstart, lstop;
 	ROS_INFO("Start simulated loop");
-	lstart = ros::WallTime::now();
+	start_loop = ros::WallTime::now();
 	for(auto i = 0; i<nsamples; i = i+framesize) {
 
 		framedata = input.middleRows(i, framesize);
-
+		
+		start_lp = ros::WallTime::now();
 		outlp.middleRows(i, framesize) = butter_lp.apply(framedata);
+		stop_lp = ros::WallTime::now();
+		
+		start_hp = ros::WallTime::now();
 		outhp.middleRows(i, framesize) = butter_hp.apply(framedata);
+		stop_hp = ros::WallTime::now();
+		
+		start_bp = ros::WallTime::now();
 		outbp.middleRows(i, framesize) = butter_bp_hp.apply(outlp.middleRows(i, framesize));
-	}
-	lstop = ros::WallTime::now();
+		stop_bp = ros::WallTime::now();
 
-	ROS_INFO("Loop ended in %f s: filters applied on data", (lstop-lstart).toSec());
+		time_lp << (stop_lp - start_lp).toNSec();
+		time_hp << (stop_hp - start_hp).toNSec();
+		time_bp << (stop_bp - start_bp).toNSec();
+	}
+	stop_loop = ros::WallTime::now();
+
+
+	ROS_INFO("Loop ended: filters applied on data");
+	ROS_INFO("Low-pass iteration time  | Average: %f ns, Max: %f ns, Min: %f ns", 
+			 time_lp.mean(), time_lp.maxCoeff(), time_lp.minCoeff()); 
+	ROS_INFO("High-pass iteration time | Average: %f ns, Max: %f ns, Min: %f ns", 
+			 time_hp.mean(), time_hp.maxCoeff(), time_hp.minCoeff()); 
+	ROS_INFO("Band-pass iteration time | Average: %f ns, Max: %f ns, Min: %f ns", 
+			 time_bp.mean(), time_bp.maxCoeff(), time_bp.minCoeff()); 
+	ROS_INFO("Overall loop time: %f ms", (stop_loop-start_loop).toNSec()/1000.0f); 
 
 	// Writing the filtered data
 	writeCSV<double>(fileoutlp, outlp);
