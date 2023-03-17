@@ -192,6 +192,8 @@ bool Butterworth<T>::configure(void) {
 		return false;
 	}
 
+	this->is_filter_configured_ = true;
+	
 	return true;
 }
 

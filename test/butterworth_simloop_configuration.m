@@ -4,8 +4,8 @@ filein = './test/input.csv';
 data = readmatrix(filein);
 
 %% rosneuro filtered data
-file_rtfilter_lp = './test/butterworth_simloop_outlp.csv';
-file_rtfilter_hp = './test/butterworth_simloop_outhp.csv';
+file_rtfilter_lp = './test/butterworth_simloop_configuration_outlp.csv';
+file_rtfilter_hp = './test/butterworth_simloop_configuration_outhp.csv';
 
 rtfilter_lp = readmatrix(file_rtfilter_lp);
 rtfilter_hp = readmatrix(file_rtfilter_hp);
@@ -70,4 +70,4 @@ xlabel('time [s]');
 ylabel('amplitude [uV]');
 title('Difference')
 
-sgtitle('Evaluation butterworth simloop')
+sgtitle('Evaluation butterworth simloop YAML configuration')

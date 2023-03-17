@@ -9,44 +9,39 @@
 
 int main(int argc, char** argv) {
 
-	std::string datapath;
-	
-	double samplerate, cutoff_lp, cutoff_hp;
-	int framesize, order_lp, order_hp;
-	
 	ros::init(argc, argv, "butterworth_simloop");
+	
+	std::string datapath;
+	int framesize;
+	
+	// YAML configuration for the filters
+	rosneuro::Filter<double>* butter_lp = new rosneuro::Butterworth<double>();
+	if(butter_lp->configure("ButterworthLowPass") == false) {
+		ROS_ERROR("[%s] Lowpass filter configuration failed", butter_lp->name().c_str());
+		return false;
+	}
+	ROS_INFO("[%s] Lowpass filter configuration succeeded", butter_lp->name().c_str());
+	
+	rosneuro::Filter<double>* butter_hp = new rosneuro::Butterworth<double>();
+	if(butter_hp->configure("ButterworthHighPass") == false) {
+		ROS_ERROR("[%s] Highpass filter configuration failed", butter_hp->name().c_str());
+		return false;
+	}
+	ROS_INFO("[%s] Highpass filter configuration succeeded", butter_hp->name().c_str());
+	
 	if(ros::param::get("~datapath", datapath) == false) {
 		ROS_ERROR("Cannot find 'datapath' parameter");
 		return 0;
 	}
-	if(ros::param::get("~samplerate", samplerate) == false) {
-		ROS_ERROR("Cannot find 'samplerate' parameter");
-		return 0;
-	}
-	if(ros::param::get("~order_lp", order_lp) == false) {
-		ROS_ERROR("Cannot find 'order_lp' parameter");
-		return 0;
-	}
-	if(ros::param::get("~order_hp", order_hp) == false) {
-		ROS_ERROR("Cannot find 'order_hp' parameter");
-		return 0;
-	}
-	if(ros::param::get("~cutoff_lp", cutoff_lp) == false) {
-		ROS_ERROR("Cannot find 'cutoff_lp' parameter");
-		return 0;
-	}
-	if(ros::param::get("~cutoff_hp", cutoff_hp) == false) {
-		ROS_ERROR("Cannot find 'cutoff_hp' parameter");
-		return 0;
-	}
+	
 	if(ros::param::get("~framesize", framesize) == false) {
 		ROS_ERROR("Cannot find 'framesize' parameter");
 		return 0;
 	}
 
 	const std::string fileinput  = datapath + "/test/input.csv";
-	const std::string fileoutlp  = datapath + "/test/butterworth_simloop_outlp.csv";
-	const std::string fileouthp  = datapath + "/test/butterworth_simloop_outhp.csv";
+	const std::string fileoutlp  = datapath + "/test/butterworth_simloop_configuration_outlp.csv";
+	const std::string fileouthp  = datapath + "/test/butterworth_simloop_configuration_outhp.csv";
 
 	// Load input data
 	rosneuro::DynamicMatrix<double> input = readCSV<double>(fileinput);
@@ -59,15 +54,6 @@ int main(int argc, char** argv) {
 	rosneuro::DynamicMatrix<double> outlp = rosneuro::DynamicMatrix<double>::Zero(nsamples, nchannels);
 	rosneuro::DynamicMatrix<double> outhp = rosneuro::DynamicMatrix<double>::Zero(nsamples, nchannels);
 	
-	// Instanciate the lowpass, highpass filters (bandpass is again a highpass
-	// filter to be applied on lowpassed data
-	rosneuro::Butterworth<double> butter_lp(rosneuro::ButterType::LowPass,  order_lp, cutoff_lp, samplerate);
-	rosneuro::Butterworth<double> butter_hp(rosneuro::ButterType::HighPass, order_hp, cutoff_hp, samplerate);
-
-	// Dump filter configuration
-	butter_lp.dump();
-	butter_hp.dump();
-
 	// Allocate frame data (for simulating online loop) 	
 	rosneuro::DynamicMatrix<double> framedata = rosneuro::DynamicMatrix<double>::Zero(framesize, nchannels);
 
@@ -85,11 +71,11 @@ int main(int argc, char** argv) {
 		framedata = input.middleRows(i, framesize);
 		
 		start_lp = ros::WallTime::now();
-		outlp.middleRows(i, framesize) = butter_lp.apply(framedata);
+		outlp.middleRows(i, framesize) = butter_lp->apply(framedata);
 		stop_lp = ros::WallTime::now();
 		
 		start_hp = ros::WallTime::now();
-		outhp.middleRows(i, framesize) = butter_hp.apply(framedata);
+		outhp.middleRows(i, framesize) = butter_hp->apply(framedata);
 		stop_hp = ros::WallTime::now();
 		
 		time_lp << (stop_lp - start_lp).toNSec();
@@ -103,7 +89,7 @@ int main(int argc, char** argv) {
 			 time_lp.mean(), time_lp.maxCoeff(), time_lp.minCoeff()); 
 	ROS_INFO("High-pass iteration time | Average: %f ns, Max: %f ns, Min: %f ns", 
 			 time_hp.mean(), time_hp.maxCoeff(), time_hp.minCoeff()); 
-	ROS_INFO("Overall loop time (%d iterations): %f ms", nsamples/framesize, 
+	ROS_INFO("Overall loop time (%d iterations): %f ms", nsamples/framesize,
 														 (stop_loop-start_loop).toNSec()/1000.0f); 
 
 	// Writing the filtered data

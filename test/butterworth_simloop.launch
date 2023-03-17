@@ -1,14 +1,20 @@
 <launch>	
-	<rosparam command="load" file="$(find rosneuro_filters)/test/butterworth_simloop.yaml"/>
-	<node name="butterworth_simloop" pkg="rosneuro_filters"
-	type="butterworth_simloop" output="screen">
-		<param name="datapath" value="$(find rosneuro_filters)" />
-		<param name="samplerate" value="512" />
-		<param name="order_lp" value="4" />
-		<param name="order_hp" value="4" />
-		<param name="cutoff_lp" value="10" />
-		<param name="cutoff_hp" value="1" />
-		<param name="framesize" value="32" />
-		
+	<arg name="datapath"   default="$(find rosneuro_filters)"/>
+	<arg name="framesize"  default="32"/>
+	<arg name="samplerate" default="512"/>
+	<arg name="order_lp"   default="4"/>
+	<arg name="order_hp"   default="4"/>
+	<arg name="cutoff_lp"  default="10"/>
+	<arg name="cutoff_hp"  default="1"/>
+
+	<node name="butterworth_simloop" pkg="rosneuro_filters" type="butterworth_simloop" output="screen">
+		<rosparam param="datapath"   subst_value="True">$(arg datapath)</rosparam>
+		<rosparam param="framesize"  subst_value="True">$(arg framesize)</rosparam>
+		<rosparam param="samplerate" subst_value="True">$(arg samplerate)</rosparam>
+		<rosparam param="order_lp"   subst_value="True">$(arg order_lp)</rosparam>
+		<rosparam param="order_hp"   subst_value="True">$(arg order_hp)</rosparam>
+		<rosparam param="cutoff_lp"  subst_value="True">$(arg cutoff_lp)</rosparam>
+		<rosparam param="cutoff_hp"  subst_value="True">$(arg cutoff_hp)</rosparam>
+	
 	</node>
 </launch>
