@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rosneuro_filters</name>
-  <version>1.5.0</version>
+  <version>1.0.0</version>
   <description>ROSNeuro filters package</description>
   <author email="luca.tonin@dei.unipd.it">Luca Tonin</author>
   <maintainer email="luca.tonin@dei.unipd.it">Luca Tonin</maintainer>
@@ -22,10 +22,13 @@
   <depend>rosconsole</depend>
   <build_depend>pluginlib</build_depend>
   <exec_depend>pluginlib</exec_depend>
+  <build_depend>rosneuro_buffers</build_depend>
+  <exec_depend>rosneuro_buffers</exec_depend>
   
   <export>
     <rosneuro_filters plugin="${prefix}/plugins_spatialfilters.xml" />
     <rosneuro_filters plugin="${prefix}/plugins_frequencyfilters.xml" />
+    <rosneuro_filters plugin="${prefix}/plugins_windows.xml" />
   </export>
 
 </package>
