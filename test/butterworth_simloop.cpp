@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
 	// Start iteration for simulating online loop
 	ROS_INFO("Start simulated loop");
 	start_loop = ros::WallTime::now();
+	auto count = 0;
 	for(auto i = 0; i<nsamples; i = i+framesize) {
 
 		framedata = input.middleRows(i, framesize);
@@ -92,19 +93,31 @@ int main(int argc, char** argv) {
 		outhp.middleRows(i, framesize) = butter_hp.apply(framedata);
 		stop_hp = ros::WallTime::now();
 		
-		time_lp << (stop_lp - start_lp).toNSec();
-		time_hp << (stop_hp - start_hp).toNSec();
+		time_lp(count) = (stop_lp - start_lp).toNSec();
+		time_hp(count) = (stop_hp - start_hp).toNSec();
+		count++;
 	}
 	stop_loop = ros::WallTime::now();
 
 
+	Eigen::Index max_id_lp, min_id_lp, max_id_hp, min_id_hp;
+	float mean_lp, mean_hp, mean_loop;
+	float max_lp, min_lp, max_hp, min_hp;
+
+	mean_lp   = time_lp.mean()/1000.0f;
+	mean_hp   = time_hp.mean()/1000.0f;
+	mean_loop = (stop_loop-start_loop).toNSec()/1000.0f; 
+	max_lp = time_lp.maxCoeff(&max_id_lp)/1000.0f;
+	max_hp = time_hp.maxCoeff(&max_id_hp)/1000.0f;
+	min_lp = time_lp.minCoeff(&min_id_lp)/1000.0f;
+	min_hp = time_hp.minCoeff(&min_id_hp)/1000.0f;
+	
 	ROS_INFO("Loop ended: filters applied on data");
-	ROS_INFO("Low-pass iteration time  | Average: %f ns, Max: %f ns, Min: %f ns", 
-			 time_lp.mean(), time_lp.maxCoeff(), time_lp.minCoeff()); 
-	ROS_INFO("High-pass iteration time | Average: %f ns, Max: %f ns, Min: %f ns", 
-			 time_hp.mean(), time_hp.maxCoeff(), time_hp.minCoeff()); 
-	ROS_INFO("Overall loop time (%d iterations): %f ms", nsamples/framesize, 
-														 (stop_loop-start_loop).toNSec()/1000.0f); 
+	ROS_INFO("Low-pass iteration time  | Average: %9.6f ms, Max: %09.6f ms (at %ld), Min: %09.6f ms (at %ld)", 
+			 mean_lp, max_lp, max_id_lp, min_lp, min_id_lp); 
+	ROS_INFO("High-pass iteration time | Average: %9.6f ms, Max: %09.6f ms (at %ld), Min: %09.6f ms (at %ld)", 
+			 mean_hp, max_hp, max_id_hp, min_hp, min_id_hp); 
+	ROS_INFO("Overall loop time (%d iterations): %f ms", count, mean_loop); 
 
 	// Writing the filtered data
 	writeCSV<double>(fileoutlp, outlp);

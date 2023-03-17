@@ -18,6 +18,7 @@ class Filter {
 		virtual bool configure(void) = 0;
 		virtual DynamicMatrix<T> apply(const DynamicMatrix<T>& in) = 0;
 
+		virtual void dump(void);
 
 	protected:
 		bool configured_;
@@ -59,6 +60,17 @@ std::string Filter<T>::type(void) const {
 template<typename T>
 std::string Filter<T>::name(void) const {
 	return this->name_;
+}
+
+template<typename T>
+void Filter<T>::dump(void) {
+
+	printf("===================================================\n");
+	printf("[%s] - Filter configuration:\n", this->name().c_str());
+	printf("===================================================\n");
+	printf("\tDumping configuration not implemented for %s\n", this->name().c_str());
+	
+	printf("\n");
 }
 
 /*** Configure stuff - To be moved to friend class **/

@@ -13,44 +13,67 @@ template<typename T>
 class FilterChain {
 
 	public:
-		FilterChain(const std::string data_type);
+		FilterChain(void);
 		~FilterChain(void);
 		
 		bool configure(const std::string param_name, ros::NodeHandle nh = ros::NodeHandle());
 		bool configure(XmlRpc::XmlRpcValue& config, const std::string& proc_ns);
-		bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out);
-		//DynamicMatrix<T> apply(const Eigen::Ref< const DynamicMatrix<T> >& in);
+		
+		DynamicMatrix<T> apply(const DynamicMatrix<T>& in);
 		bool clear(void);
+		void dump(void);
+
+	private:
+		std::string get_baseclass_name(void);
+
 
 	private:
 		bool configured_;
 		std::vector<boost::shared_ptr<rosneuro::Filter<T>>> procs_;
-		pluginlib::ClassLoader<rosneuro::Filter<T> > loader_;
-		NeuroData<T> buffer0_;
-		NeuroData<T> buffer1_;
+		pluginlib::ClassLoader<rosneuro::Filter<T> >* loader_;
+		DynamicMatrix<T> buffer0_;
+		DynamicMatrix<T> buffer1_;
 
 };
 
-
 template<typename T>
-FilterChain<T>::FilterChain(const std::string data_type) : 
-		loader_("rosneuro_filters", std::string("rosneuro::Filter<") + data_type + std::string(">")), 
-		configured_(false) {
-	
+FilterChain<T>::FilterChain(void) {
+	this->loader_ = new pluginlib::ClassLoader<rosneuro::Filter<T> >("rosneuro_filters", this->get_baseclass_name());
+
 	std::string lib_string = "";
-	std::vector<std::string> libs = this->loader_.getDeclaredClasses();
+	std::vector<std::string> libs = this->loader_->getDeclaredClasses();
 
 	for (auto i = 0 ; i < libs.size(); i++) {
        lib_string = lib_string + std::string(", ") + libs[i];
 	}    
      
 	ROS_DEBUG("In FilterChain ClassLoader found the following libs: %s", lib_string.c_str());
+
+
+	this->configured_ = false;
 }
 
 template<typename T>
 FilterChain<T>::~FilterChain(void) {
 	this->clear();
+	delete this->loader_;
 }
+
+template<>
+std::string FilterChain<float>::get_baseclass_name(void) {
+	return "rosneuro::Filter<float>";
+}
+
+template<>
+std::string FilterChain<double>::get_baseclass_name(void) {
+	return "rosneuro::Filter<double>";
+}
+
+template<>
+std::string FilterChain<int>::get_baseclass_name(void) {
+	return "rosneuro::Filter<int>";
+}
+
 
 template<typename T>
 bool FilterChain<T>::clear(void) {
@@ -61,29 +84,35 @@ bool FilterChain<T>::clear(void) {
 }
 
 template<typename T>
-bool FilterChain<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) {
+DynamicMatrix<T> FilterChain<T>::apply(const DynamicMatrix<T>& input) {
 
+	DynamicMatrix<T> output;
 	unsigned int nprocs = this->procs_.size();
 
-	if(nprocs == 0) {
-		data_out = data_in;
-	} else {
+	if(nprocs == 0)
+		return input;
+		
 
-		this->buffer0_ = data_in;
-		this->buffer1_ = data_out;
+	this->buffer0_ = input;
+	this->buffer1_ = output;
 
-		for(auto it=this->procs_.begin(); it != this->procs_.end(); ++it) {
-			ROS_INFO("Applying filter '%s'", (*it)->name().c_str());
-			(*it)->apply(this->buffer0_, this->buffer1_);
-			this->buffer0_ = this->buffer1_;
-		}
-
-		data_out = this->buffer1_;
+	for(auto it=this->procs_.begin(); it != this->procs_.end(); ++it) {
+		this->buffer1_ = (*it)->apply(this->buffer0_);
+		this->buffer0_ = this->buffer1_;
 	}
-	return true;
 
+	output = this->buffer1_;
+
+	return output;
 }
 
+
+template<typename T>
+void FilterChain<T>::dump(void) {
+
+	for(auto it=this->procs_.begin(); it != this->procs_.end(); ++it)
+		(*it)->dump();
+}
 
 template<typename T>
 bool FilterChain<T>::configure(const std::string param_name, ros::NodeHandle nh) {
@@ -158,7 +187,7 @@ bool FilterChain<T>::configure(XmlRpc::XmlRpcValue& config, const std::string& f
       		}
     
 			//Make sure the filter chain has a valid type
-    		std::vector<std::string> libs = this->loader_.getDeclaredClasses();
+    		std::vector<std::string> libs = this->loader_->getDeclaredClasses();
     		bool found = false;
     		for (auto it = libs.begin(); it != libs.end(); ++it) {
         		if (*it == std::string(config[i]["type"])) {
@@ -179,7 +208,7 @@ bool FilterChain<T>::configure(XmlRpc::XmlRpcValue& config, const std::string& f
 
    	for (int i = 0; i < config.size(); ++i) {
   
-		boost::shared_ptr<rosneuro::Filter<T> > p(this->loader_.createInstance(config[i]["type"]));
+		boost::shared_ptr<rosneuro::Filter<T> > p(this->loader_->createInstance(config[i]["type"]));
 
   		if (p.get() == nullptr)
     		return false;

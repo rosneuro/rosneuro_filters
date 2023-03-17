@@ -1,0 +1,15 @@
+ButterworthBandPass:
+    - name: butterworth-lowpass
+      type: rosneuro_filters/ButterworthFilterDouble
+      params: 
+        samplerate: 512
+        type: lowpass
+        order: 4
+        cutoff: 10
+    - name: butterworth-highpass
+      type: rosneuro_filters/ButterworthFilterDouble
+      params: 
+        samplerate: 512
+        type: highpass
+        order: 4
+        cutoff: 1

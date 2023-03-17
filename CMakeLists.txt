@@ -100,6 +100,9 @@ target_link_libraries(butterworth_simloop ${PROJECT_NAME}_butterworth ${catkin_L
 add_executable(butterworth_simloop_configuration test/butterworth_simloop_configuration.cpp)
 target_link_libraries(butterworth_simloop_configuration ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
 
+add_executable(butterworth_simloop_chain test/butterworth_simloop_chain.cpp)
+target_link_libraries(butterworth_simloop_chain ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
+
 #################
 ##   Install   ##
 #################
