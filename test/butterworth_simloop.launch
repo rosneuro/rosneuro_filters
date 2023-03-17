@@ -1,0 +1,14 @@
+<launch>	
+	<rosparam command="load" file="$(find rosneuro_filters)/test/butterworth_simloop.yaml"/>
+	<node name="butterworth_simloop" pkg="rosneuro_filters"
+	type="butterworth_simloop" output="screen">
+		<param name="datapath" value="$(find rosneuro_filters)" />
+		<param name="samplerate" value="512" />
+		<param name="order_lp" value="4" />
+		<param name="order_hp" value="4" />
+		<param name="cutoff_lp" value="10" />
+		<param name="cutoff_hp" value="1" />
+		<param name="framesize" value="32" />
+		
+	</node>
+</launch>

@@ -2,7 +2,6 @@ ButterworthCfgTest:
   name: butterworth
   type: ButterworthFilterFloat
   params: 
-    nchannels: 1
     order: 4
     samplerate: 512
     type: lowpass

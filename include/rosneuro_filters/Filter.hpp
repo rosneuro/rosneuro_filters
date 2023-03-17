@@ -4,22 +4,33 @@
 #include <string>
 #include <map>
 #include <ros/ros.h>
-#include "rosneuro_data/NeuroData.hpp"
 
 namespace rosneuro {
+
+template<typename T> using DynamicMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 template <typename T>
 class Filter {
 	public:
 		Filter(void) : configured_(false) {};
 		virtual ~Filter(void) {};
+		
+		virtual bool configure(void) = 0;
+		virtual DynamicMatrix<T> apply(const DynamicMatrix<T>& in) = 0;
 
+
+	protected:
+		bool configured_;
+		std::string type_;
+		std::string name_;
+
+	// Configuration stuff - To be moved to friend class
+	public:
 		bool configure(const std::string& param_name);
 		bool configure(XmlRpc::XmlRpcValue& config);
 		std::string type(void) const;
 		std::string name(void) const;
 
-		virtual bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) = 0;
 
 		bool getParam(const std::string& name, std::string& value) const;
 		bool getParam(const std::string& name, bool& value) const;
@@ -31,13 +42,7 @@ class Filter {
 		bool getParam(const std::string& name, XmlRpc::XmlRpcValue& value) const;
 
 	protected:
-		virtual bool configure(void) = 0;
 		bool loadConfiguration(XmlRpc::XmlRpcValue& config);
-
-	protected:
-		bool configured_;
-		std::string type_;
-		std::string name_;
 		std::map<std::string, XmlRpc::XmlRpcValue> params_;
 
 	private:
@@ -56,6 +61,7 @@ std::string Filter<T>::name(void) const {
 	return this->name_;
 }
 
+/*** Configure stuff - To be moved to friend class **/
 template<typename T>
 bool Filter<T>::setNameAndType(XmlRpc::XmlRpcValue& config) {
 

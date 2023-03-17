@@ -19,6 +19,7 @@ class FilterChain {
 		bool configure(const std::string param_name, ros::NodeHandle nh = ros::NodeHandle());
 		bool configure(XmlRpc::XmlRpcValue& config, const std::string& proc_ns);
 		bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out);
+		//DynamicMatrix<T> apply(const Eigen::Ref< const DynamicMatrix<T> >& in);
 		bool clear(void);
 
 	private:

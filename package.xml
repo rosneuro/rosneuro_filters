@@ -22,6 +22,8 @@
   <depend>rosconsole</depend>
   <build_depend>pluginlib</build_depend>
   <exec_depend>pluginlib</exec_depend>
+  <build_depend>rosneuro_buffers</build_depend>
+  <exec_depend>rosneuro_buffers</exec_depend>
   
   <export>
     <rosneuro_filters plugin="${prefix}/plugins_spatialfilters.xml" />

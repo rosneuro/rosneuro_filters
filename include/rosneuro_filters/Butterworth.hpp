@@ -1,61 +1,164 @@
 #ifndef ROSNEURO_FILTERS_BUTTERWORTH_HPP
 #define ROSNEURO_FILTERS_BUTTERWORTH_HPP
 
-#include <algorithm>
 #include <Eigen/Dense>
 #include <rtf_common.h>
 #include <rtfilter.h>
-
 #include "rosneuro_filters/Filter.hpp"
 
 namespace rosneuro {
 
-enum class ButterType {LOWPASS = 0, HIGHPASS};
+enum class ButterType {Unknown = -1, LowPass, HighPass};
 
 template <typename T>
 class Butterworth: public Filter<T> {
 	
 	public:
 		Butterworth(void);
+		Butterworth(ButterType type, int order, double cutoff, double samplerate);
 		~Butterworth(void);
 
 		bool configure(void);
-		bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out);
+		DynamicMatrix<T> apply(const DynamicMatrix<T>& in);
+
+		int type(void) const;
+		int order(void) const;
+		double cutoff(void) const;
+		double samplerate(void) const;
+			
+		void dump(void);
 
 	private:
-		bool setup_rtfilter(void);
+		bool create_butterworth_filter(int nchannels);
+		std::string buttertype(ButterType type);
 
 	private:
-		unsigned int order_;
-		unsigned int nchannels_;
-		double 		 samplerate_;
-		double 		 cutoff_;
-		unsigned int type_;
-		hfilter 	 filt_ = nullptr;
+		int 	nchannels_;
+		double 	samplerate_;
+		int		type_;
+		int 	order_;
+		double 	cutoff_;
+		hfilter filter_;
+		
+		bool is_filter_configured_;
+		bool is_filter_set_;
 };
 
 template<typename T>
 Butterworth<T>::Butterworth(void) {
+	this->name_    	  = this->buttertype(ButterType::Unknown);
+	this->samplerate_ = 0.0f;
+	this->type_       = static_cast<int>(ButterType::Unknown);
+	this->order_      = 0;
+	this->cutoff_     = 0.0f;
+	this->filter_  	  = nullptr;
+	
+	this->is_filter_configured_ = false;
+	this->is_filter_set_ 	    = false;
+}
+
+template<typename T>
+Butterworth<T>::Butterworth(ButterType type, int order, double cutoff, double samplerate)  {
+
+	this->name_       = this->buttertype(type);
+	this->samplerate_ = samplerate;
+	this->type_       = static_cast<int>(type);
+	this->order_      = order;
+	this->cutoff_     = cutoff;
+	this->filter_  	  = nullptr;
+
+	this->is_filter_configured_ = true;
+	this->is_filter_set_ 	    = false;
 }
 
 template<typename T>
 Butterworth<T>::~Butterworth(void) {
-	if (this->filt_ != nullptr)
-		rtf_destroy_filter(this->filt_);
+	if (this->filter_ != nullptr)
+		rtf_destroy_filter(this->filter_);
+}
+
+template<>
+bool Butterworth<float>::create_butterworth_filter(int nchannels) {
+	
+	bool 	retcod = true;
+	double 	normfc;
+
+	this->nchannels_ = nchannels;
+		
+	normfc = this->cutoff_/this->samplerate_;
+	this->filter_ = rtf_create_butterworth(this->nchannels_, RTF_FLOAT, normfc, 
+									 this->order_, static_cast<unsigned int>(this->type_));
+
+	if(this->filter_ == nullptr)
+			retcod = false;
+
+	return retcod;
+}
+
+template<>
+bool Butterworth<double>::create_butterworth_filter(int nchannels) {
+	
+	bool 	retcod = true;
+	double 	normfc;
+
+	this->nchannels_ = nchannels;
+		
+	normfc = this->cutoff_/this->samplerate_;
+	this->filter_ = rtf_create_butterworth(this->nchannels_, RTF_DOUBLE, normfc, 
+									 this->order_, static_cast<unsigned int>(this->type_));
+
+	if(this->filter_ == nullptr)
+			retcod = false;
+
+	return retcod;
 }
 
 
 template<typename T>
+DynamicMatrix<T> Butterworth<T>::apply(const DynamicMatrix<T>& in) {
+	
+	// If the filter is not configured, then throw an exception
+	if(this->is_filter_configured_ == false) {
+		throw std::runtime_error("[" + this->name() + "] - Filter is not configured");
+	}
+
+	// If the filter is not set (rtfilter), then set it the first time the
+	// function is called. If it is not possible to set the filter, then throw
+	// an exception
+	if(this->is_filter_set_ == false) {
+		this->is_filter_set_ = this->create_butterworth_filter(in.cols());
+	
+		if(this->is_filter_set_ == false)
+			throw std::runtime_error("[" + this->name() + "] - First apply: cannot set the filter");
+		else	
+			ROS_WARN("[%s] First apply: the filter is set", this->name().c_str());
+	}
+
+	// Allocate input and output matrix (transposed [channels x samples])
+	DynamicMatrix<T> infilt = DynamicMatrix<T>::Zero(in.cols(), in.rows());
+	DynamicMatrix<T> output = DynamicMatrix<T>::Zero(in.cols(), in.rows());
+
+	// Transpose input 
+	infilt = in.transpose();
+
+	// Get pointer to the input data
+	T* p_in  = const_cast<T*>( infilt.data());
+	
+	// Get pointer to the output data
+	T* p_out = static_cast<T*>(output.data());
+
+	// Apply filter
+	rtf_filter(this->filter_, p_in, p_out, output.cols());
+
+	// Return the transposed version [samples x channels] of the output
+	return output.transpose();
+}
+
+template<typename T>
 bool Butterworth<T>::configure(void) {
 
-	std::string stype;
-	bool retcod;
+	std::string s_type;
 
-	if (!Filter<T>::getParam(std::string("nchannels"), this->nchannels_)) {
-    	ROS_ERROR("[Butterworth] Cannot find param 'nchannels'");
-		return false;
-	}
-	
 	if (!Filter<T>::getParam(std::string("order"), this->order_)) {
     	ROS_ERROR("[Butterworth] Cannot find param 'order'");
 		return false;
@@ -71,90 +174,79 @@ bool Butterworth<T>::configure(void) {
 		return false;
 	}
 
-	if (!Filter<T>::getParam(std::string("type"), stype)) {
+	if (!Filter<T>::getParam(std::string("type"), s_type)) {
     	ROS_ERROR("[Butterworth] Cannot find param 'type'");
 		return false;
 	}
 
-	std::transform(stype.begin(), stype.end(), stype.begin(), ::tolower);
+	// Case-insensitve
+	std::transform(s_type.begin(), s_type.end(), s_type.begin(), ::tolower);
 
-	if (stype.compare("lowpass") == 0) {
-		this->type_ = static_cast<unsigned int>(ButterType::LOWPASS);
-	} else if (stype.compare("highpass") == 0 ) {
-		this->type_ = static_cast<unsigned int>(ButterType::HIGHPASS);
-	} else if (stype.compare("bandpass") == 0 ) {
-		ROS_ERROR("[Butterworth] Butterworth bandpass filter not implemented yet. Use a sequence of low and highpass filters");
-		return false;
-		//this->type_ = static_cast<unsigned int>(ButterType::BANDPASS);
+	if (s_type.compare("lowpass") == 0) {
+		this->type_ = static_cast<unsigned int>(ButterType::LowPass);
+	} else if (s_type.compare("highpass") == 0 ) {
+		this->type_ = static_cast<unsigned int>(ButterType::HighPass);
 	} else {
+		this->type_ = static_cast<unsigned int>(ButterType::Unknown);
 		ROS_ERROR("[Butterworth] Unknown butterworth filter type");
 		return false;
 	}
 
-	// Setup filter
-	retcod = this->setup_rtfilter();
-
-	return retcod;
-	
-}
-
-template<typename T>
-bool Butterworth<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) {
-
-	T* p_in  = const_cast<T*>(data_in.data());
-	T* p_out = const_cast<T*>(data_out.data());
-
-	unsigned int ns_in  = data_in.nsamples();
-	unsigned int nc_in  = data_in.nchannels();
-	unsigned int ns_out = data_out.nsamples();
-	unsigned int nc_out = data_out.nchannels();
-
-
-	if(ns_in != ns_out) {
-		ROS_ERROR("[Butterworth] Different number of samples between data in and data out");
-		return false;
-	}
-	
-	if(nc_in != nc_out) {
-		ROS_ERROR("[Butterworth] Different number of channels between data in and data out");
-		return false;
-	}
-
-	rtf_filter(this->filt_, p_in, p_out, ns_in);
-	
 	return true;
 }
 
-template<>
-bool Butterworth<float>::setup_rtfilter(void) {
-
-	bool retcod = true;
-	double normfc;
-
-	normfc = this->cutoff_/this->samplerate_;
-	this->filt_ = rtf_create_butterworth(this->nchannels_, RTF_FLOAT, normfc, 
-										 this->order_, static_cast<unsigned int>(this->type_));
-
-	if(this->filt_ == nullptr)
-		retcod = false;
-
-	return retcod;
+template<typename T>
+int Butterworth<T>::type(void) const {
+	return this->type_;
 }
 
-template<>
-bool Butterworth<double>::setup_rtfilter(void) {
+template<typename T>
+int Butterworth<T>::order(void) const {
+	return this->order_;
+}
 
-	bool retcod = true;
+template<typename T>
+double Butterworth<T>::cutoff(void) const {
+	return this->cutoff_;
+}
 
-	double normfc;
-	normfc = this->cutoff_/this->samplerate_;
-	this->filt_ = rtf_create_butterworth(this->nchannels_, RTF_DOUBLE, normfc, 
-										 this->order_, static_cast<unsigned int>(this->type_));
+template<typename T>
+double Butterworth<T>::samplerate(void) const {
+	return this->samplerate_;
+}
 
-	if(this->filt_ == nullptr)
-		retcod = false;
+template<typename T> 
+std::string Butterworth<T>::buttertype(ButterType type) {
+	std::string name;
 
-	return retcod;
+	switch(type) {
+		case ButterType::LowPass:
+			name = "lowpass";
+			break;
+		case ButterType::HighPass:
+			name = "highpass";
+			break;
+		default:
+			name = "unknown";
+			break;
+	}
+
+	return name;
+}
+
+template<typename T> 
+void Butterworth<T>::dump(void) {
+
+	printf("===================================================\n");
+	printf("[%s] - Filter configuration:\n", this->name().c_str());
+	printf("===================================================\n");
+	printf("\tSamplerate:     %f\n", this->samplerate());
+	printf("\tFilter type:    %d\n", this->type());
+	printf("\tFilter order:   %d\n", this->order());
+	printf("\tFilter cutoff:  %f\n", this->cutoff());
+
+	printf("\n");
+
 }
 
 }
