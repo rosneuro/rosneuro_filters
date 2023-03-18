@@ -34,7 +34,7 @@ include_directories(${catkin_INCLUDE_DIRS}
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES 
-  #${PROJECT_NAME}_car 
+  ${PROJECT_NAME}_car 
   #${PROJECT_NAME}_dc
   #${PROJECT_NAME}_laplacian
 	${PROJECT_NAME}_butterworth
@@ -57,11 +57,11 @@ add_definitions(${EIGEN3_DEFINITIONS})
 ## Plugin
 
 # CAR Spatial filter
-#add_library(${PROJECT_NAME}_car src/Car.cpp)
-#target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} 
-#										  ${catkin_LIBRARIES}
-#)
-#
+add_library(${PROJECT_NAME}_car src/Car.cpp)
+target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES} 
+										  ${catkin_LIBRARIES}
+)
+
 ## DC Spatial filter
 #add_library(${PROJECT_NAME}_dc src/Dc.cpp)
 #target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} 
@@ -85,9 +85,9 @@ target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES}
 ## Executables ##
 #################
 
-#add_executable(test_car test/test_car.cpp)
-#target_link_libraries(test_car ${PROJECT_NAME}_car ${catkin_LIBRARIES})
-#
+add_executable(car_simloop_config test/car_simloop_config.cpp)
+target_link_libraries(car_simloop_config ${PROJECT_NAME}_car ${catkin_LIBRARIES}) 
+
 #add_executable(test_dc test/test_dc.cpp)
 #target_link_libraries(test_dc ${PROJECT_NAME}_dc ${catkin_LIBRARIES})
 
@@ -97,8 +97,8 @@ target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES}
 add_executable(butterworth_simloop test/butterworth_simloop.cpp)
 target_link_libraries(butterworth_simloop ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
 
-add_executable(butterworth_simloop_configuration test/butterworth_simloop_configuration.cpp)
-target_link_libraries(butterworth_simloop_configuration ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
+add_executable(butterworth_simloop_config test/butterworth_simloop_config.cpp)
+target_link_libraries(butterworth_simloop_config ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
 
 add_executable(butterworth_simloop_chain test/butterworth_simloop_chain.cpp)
 target_link_libraries(butterworth_simloop_chain ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
