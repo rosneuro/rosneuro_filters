@@ -16,6 +16,13 @@ class Laplacian : public Filter<T> {
 		bool configure(void);
 		DynamicMatrix<T> apply(const DynamicMatrix<T>& in);
 
+		bool set_layout(const std::string& slayout, int nchannels);
+		bool set_layout(const DynamicMatrix<int>& layout, int nchannels);
+		bool set_mask(const DynamicMatrix<T>& mask);
+
+		DynamicMatrix<int> layout(void) const;
+		DynamicMatrix<T> mask(void) const;
+
 	private:
 		bool load_layout(const std::string slayout);
 		bool has_duplicate(const std::string slayout);
@@ -24,6 +31,7 @@ class Laplacian : public Filter<T> {
 		std::vector<int> get_neightbours(unsigned int rId, unsigned int cId);
 	
 	private:
+		bool is_mask_set_;
 		unsigned int nchannels_;
 		DynamicMatrix<int> layout_;
 		DynamicMatrix<T> mask_;
@@ -32,6 +40,7 @@ class Laplacian : public Filter<T> {
 template<typename T>
 Laplacian<T>::Laplacian(void) {
 	this->name_ = "laplacian";
+	this->is_mask_set_ = true;
 }
 
 
@@ -70,8 +79,75 @@ bool Laplacian<T>::configure(void) {
 		return false;
 	}
 
+	this->is_mask_set_ = true;
+	
 	return retcod;
 }
+
+
+template<typename T>
+bool Laplacian<T>::set_layout(const DynamicMatrix<int>& layout, int nchannels) {
+
+	this->layout_ 	   = layout;
+	this->nchannels_   = nchannels;
+	this->is_mask_set_ = false;
+
+	if(this->create_mask() == false)  {
+		ROS_ERROR("[%s] Cannot create laplacian mask", this->name().c_str());
+		return false;
+	}
+	
+	this->is_mask_set_ = true;
+
+	return true;
+}
+
+template<typename T>
+bool Laplacian<T>::set_layout(const std::string& layout, int nchannels) {
+
+	this->nchannels_   = nchannels;
+	this->is_mask_set_ = false;
+
+	if(this->has_duplicate(layout)) {
+    	ROS_ERROR("[%s] The provided layout has duplicated indexes", this->name().c_str());
+		return false;
+	}
+
+	if(this->load_layout(layout) == false) {
+		ROS_ERROR("[%s] The provided layout is wrongly formatted", this->name().c_str());
+		return false;
+	}
+	
+	if(this->create_mask() == false)  {
+		ROS_ERROR("[%s] Cannot create laplacian mask", this->name().c_str());
+		return false;
+	}
+
+	this->is_mask_set_ = true;
+
+	return true;
+}
+
+template<typename T>
+bool Laplacian<T>::set_mask(const DynamicMatrix<T>& mask) {
+
+	this->mask_ = mask;
+	
+	this->is_mask_set_ = true;
+
+	return true;
+}
+
+template<typename T>
+DynamicMatrix<int> Laplacian<T>::layout(void) const {
+	return this->layout_;
+}
+
+template<typename T>
+DynamicMatrix<T> Laplacian<T>::mask(void) const {
+	return this->mask_;
+}
+
 
 template<typename T>
 bool Laplacian<T>::create_mask(void) {
@@ -207,6 +283,12 @@ bool Laplacian<T>::load_layout(const std::string slayout) {
 
 template<typename T>
 DynamicMatrix<T> Laplacian<T>::apply(const DynamicMatrix<T>& in) {
+
+	if(this->is_mask_set_ == false) {
+		ROS_ERROR("[%s] Laplacian mask is not set", this->name().c_str());
+		throw std::runtime_error("[" + this->name() + "] - Laplacian mask is not set");
+	}
+
 	return in * this->mask_;
 }
 

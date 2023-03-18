@@ -91,6 +91,9 @@ target_link_libraries(car_simloop_config ${PROJECT_NAME}_car ${catkin_LIBRARIES}
 add_executable(dc_simloop_config test/dc_simloop_config.cpp)
 target_link_libraries(dc_simloop_config ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
 
+add_executable(laplacian_simloop test/laplacian_simloop.cpp)
+target_link_libraries(laplacian_simloop ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
+
 add_executable(laplacian_simloop_config test/laplacian_simloop_config.cpp)
 target_link_libraries(laplacian_simloop_config ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
 

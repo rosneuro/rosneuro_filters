@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 	int nsamples  = input.rows();
 	int nchannels = input.cols();
 
-	// Allocate matrix for lowpass, highpass, and bandpass data
+	// Allocate matrix for filtered data
 	rosneuro::DynamicMatrix<double> output = rosneuro::DynamicMatrix<double>::Zero(nsamples, nchannels);
 	
 	// Allocate frame data (for simulating online loop) 	
