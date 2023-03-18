@@ -26,6 +26,7 @@
   <export>
     <rosneuro_filters plugin="${prefix}/plugins_spatialfilters.xml" />
     <rosneuro_filters plugin="${prefix}/plugins_frequencyfilters.xml" />
+    <rosneuro_filters plugin="${prefix}/plugins_windows.xml" />
   </export>
 
 </package>
