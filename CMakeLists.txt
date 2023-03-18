@@ -62,12 +62,12 @@ target_link_libraries(${PROJECT_NAME}_car ${Eigen3_LIBRARIES}
 										  ${catkin_LIBRARIES}
 )
 
-## DC Spatial filter
-#add_library(${PROJECT_NAME}_dc src/Dc.cpp)
-#target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} 
-#										 ${catkin_LIBRARIES}
-#)
-#
+# DC Spatial filter
+add_library(${PROJECT_NAME}_dc src/Dc.cpp)
+target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES} 
+										 ${catkin_LIBRARIES}
+)
+
 ## Laplacian Spatial filter
 #add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
 #target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} 
@@ -88,8 +88,8 @@ target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES}
 add_executable(car_simloop_config test/car_simloop_config.cpp)
 target_link_libraries(car_simloop_config ${PROJECT_NAME}_car ${catkin_LIBRARIES}) 
 
-#add_executable(test_dc test/test_dc.cpp)
-#target_link_libraries(test_dc ${PROJECT_NAME}_dc ${catkin_LIBRARIES})
+add_executable(dc_simloop_config test/dc_simloop_config.cpp)
+target_link_libraries(dc_simloop_config ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
 
 #add_executable(test_laplacian test/test_laplacian.cpp)
 #target_link_libraries(test_laplacian ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
