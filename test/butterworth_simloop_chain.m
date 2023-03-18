@@ -1,10 +1,10 @@
 clearvars; 
 
-filein = './test/input.csv';
+filein = './test/rawdata.csv';
 data = readmatrix(filein);
 
 %% rosneuro filtered data
-file_rtfilter_bp = './test/butterworth_simloop_chain_outbp.csv';
+file_rtfilter_bp = './test/butterworth_simloop_chain_bp.csv';
 
 rtfilter_bp = readmatrix(file_rtfilter_bp);
 

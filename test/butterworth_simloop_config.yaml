@@ -1,0 +1,17 @@
+ButterworthLowPass:
+  name: butterworth
+  type: ButterworthFilterDouble
+  params: 
+    samplerate: 512
+    type: lowpass
+    order: 4
+    cutoff: 10
+
+ButterworthHighPass:
+  name: butterworth
+  type: ButterworthFilterDouble
+  params: 
+    samplerate: 512
+    type: highpass
+    order: 4
+    cutoff: 1

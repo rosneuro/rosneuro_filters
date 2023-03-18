@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	const std::string fileinput  = datapath + "/test/input.csv";
-	const std::string fileoutbp  = datapath + "/test/butterworth_simloop_chain_outbp.csv";
+	const std::string fileinput  = datapath + "/test/rawdata.csv";
+	const std::string fileoutbp  = datapath + "/test/butterworth_simloop_chain_bp.csv";
 
 	// Load input data
 	rosneuro::DynamicMatrix<double> input = readCSV<double>(fileinput);
