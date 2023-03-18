@@ -10,11 +10,11 @@ namespace rosneuro {
 template <typename T>
 class Laplacian : public Filter<T> {
 	public:
-		Laplacian(void) {};
+		Laplacian(void);
 		~Laplacian(void) {};
 
 		bool configure(void);
-		bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out);
+		DynamicMatrix<T> apply(const DynamicMatrix<T>& in);
 
 	private:
 		bool load_layout(const std::string slayout);
@@ -25,48 +25,58 @@ class Laplacian : public Filter<T> {
 	
 	private:
 		unsigned int nchannels_;
-		Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> layout_;
-		Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mask_;
+		DynamicMatrix<int> layout_;
+		DynamicMatrix<T> mask_;
 };
+
+template<typename T>
+Laplacian<T>::Laplacian(void) {
+	this->name_ = "laplacian";
+}
 
 
 template<typename T>
 bool Laplacian<T>::configure(void) {
-	
-	std::string layout_str;
 
-	if (!Filter<T>::getParam(std::string("nchannels"), this->nchannels_)) {
-    	ROS_ERROR("[Laplacian] Cannot find param nchannels");
-		return false;
-	}
+	bool retcod = false;
+	std::string layout_str;
 	
 	if (!Filter<T>::getParam(std::string("layout"), layout_str)) {
-    	ROS_ERROR("[Laplacian] Cannot find param layout");
+    	ROS_ERROR("[%s] Cannot find param layout", this->name().c_str());
 		return false;
 	}
+	
 
 	if(this->has_duplicate(layout_str)) {
-    	ROS_ERROR("[Laplacian] The provided layout has duplicated indexes");
+    	ROS_ERROR("[%s] The provided layout has duplicated indexes", this->name().c_str());
 		return false;
 	}
 
 	if(this->load_layout(layout_str) == false) {
-		ROS_ERROR("[Laplacian] The provided layout is wrongly formatted");
+		ROS_ERROR("[%s] The provided layout is wrongly formatted", this->name().c_str());
 		return false;
+	}
+	
+	if (!Filter<T>::getParam(std::string("nchannels"), this->nchannels_)) {
+		this->nchannels_ = this->layout_.maxCoeff();
+    	ROS_WARN("[%s] Number of channels not provided: assuming that the number of channels " 
+				 "corresponds to the highest index in the provided layout (%d)", 
+				 this->name().c_str(), this->nchannels_);
+		retcod = true;
 	}
 
 	if(this->create_mask() == false) {
-		ROS_ERROR("[Laplacian] Cannot create laplacian mask");
+		ROS_ERROR("[%s] Cannot create laplacian mask", this->name().c_str());
 		return false;
 	}
 
-	return true;
+	return retcod;
 }
 
 template<typename T>
 bool Laplacian<T>::create_mask(void) {
 
-	this->mask_ = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Zero(this->nchannels_, this->nchannels_);
+	this->mask_ = DynamicMatrix<T>::Zero(this->nchannels_, this->nchannels_);
 	for(auto chIdx=1; chIdx<=this->nchannels_; chIdx++) {
 
 		unsigned int crowId;
@@ -184,7 +194,7 @@ bool Laplacian<T>::load_layout(const std::string slayout) {
 
 
 
-	this->layout_ = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>::Zero(nrows, ncols);
+	this->layout_ = DynamicMatrix<int>::Zero(nrows, ncols);
 
 	for (auto i=0; i<this->layout_.rows(); i++) {
 		for(auto j=0; j<this->layout_.cols(); j++) {
@@ -196,31 +206,8 @@ bool Laplacian<T>::load_layout(const std::string slayout) {
 }
 
 template<typename T>
-bool Laplacian<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out) {
-	T* p_in  = const_cast<T*>(data_in.data());
-	T* p_out = const_cast<T*>(data_out.data());
-
-	unsigned int ns_in  = data_in.nsamples();
-	unsigned int nc_in  = data_in.nchannels();
-	unsigned int ns_out = data_out.nsamples();
-	unsigned int nc_out = data_out.nchannels();
-
-	if(ns_in != ns_out) {
-		ROS_ERROR("[Laplacian] Different number of samples between data in and data out");
-		return false;
-	}
-	
-	if(nc_in != nc_out) {
-		ROS_ERROR("[Laplacian] Different number of channels between data in and data out");
-		return false;
-	}
-
-	Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> in(p_in, ns_in, nc_in);
-	Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> out(p_out, ns_out, nc_out);
-
-	out = in * this->mask_;
-
-	return true;
+DynamicMatrix<T> Laplacian<T>::apply(const DynamicMatrix<T>& in) {
+	return in * this->mask_;
 }
 
 

@@ -68,11 +68,11 @@ target_link_libraries(${PROJECT_NAME}_dc ${Eigen3_LIBRARIES}
 										 ${catkin_LIBRARIES}
 )
 
-## Laplacian Spatial filter
-#add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
-#target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} 
-#												${catkin_LIBRARIES}
-#)
+# Laplacian Spatial filter
+add_library(${PROJECT_NAME}_laplacian src/Laplacian.cpp)
+target_link_libraries(${PROJECT_NAME}_laplacian ${Eigen3_LIBRARIES} 
+												${catkin_LIBRARIES}
+)
 
 # Butterworth frequency filter
 add_library(${PROJECT_NAME}_butterworth src/Butterworth.cpp)
@@ -91,8 +91,8 @@ target_link_libraries(car_simloop_config ${PROJECT_NAME}_car ${catkin_LIBRARIES}
 add_executable(dc_simloop_config test/dc_simloop_config.cpp)
 target_link_libraries(dc_simloop_config ${PROJECT_NAME}_dc ${catkin_LIBRARIES}) 
 
-#add_executable(test_laplacian test/test_laplacian.cpp)
-#target_link_libraries(test_laplacian ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
+add_executable(laplacian_simloop_config test/laplacian_simloop_config.cpp)
+target_link_libraries(laplacian_simloop_config ${PROJECT_NAME}_laplacian ${catkin_LIBRARIES}) 
 
 add_executable(butterworth_simloop test/butterworth_simloop.cpp)
 target_link_libraries(butterworth_simloop ${PROJECT_NAME}_butterworth ${catkin_LIBRARIES}) 
