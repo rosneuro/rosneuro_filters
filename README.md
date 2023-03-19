@@ -1,86 +1,57 @@
 # ROSNeuro Filters package
-The package provides a generic interface to implement filters to be applied on NeuroData. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, the package provides the following plugins:
+The package provides a generic interface to implement filters to be applied on input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, the package provides the following plugins:
 
 #### Temporal filters
-- **rosneuro::Dc\<T\>** filter (to remove the DC component to each channel of *NeuroData*)
+- **rosneuro::Dc\<T\>** filter (to remove the DC component to each channel of input data)
 
 #### Spatial filters
-- **rosneuro::Car\<T\>** filter (to apply a Common Average Reference filter to the *NeuroData*)
-- **rosneuro::Laplacian\<T\>** filter (to apply Laplacian derivation to the *NeuroData*)
+- **rosneuro::Car\<T\>** filter (to apply a Common Average Reference filter to input data)
+- **rosneuro::Laplacian\<T\>** filter (to apply Laplacian derivation to input data)
 
 #### Windows
-- **rosneuro::Blackman\<T\>** window (to apply Blackman window to the *NeuroData*)
-- **rosneuro::Flattop\<T\>** window (to apply Flattop window to the *NeuroData*)
-- **rosneuro::Hamming\<T\>** window (to apply Hamming window to the *NeuroData*)
-- **rosneuro::Hann\<T\>** window (to apply Hann window to the *NeuroData*)
+- **rosneuro::Blackman\<T\>** window (to apply Blackman window to input data)
+- **rosneuro::Flattop\<T\>** window (to apply Flattop window to the input data)
+- **rosneuro::Hamming\<T\>** window (to apply Hamming window to the input data)
+- **rosneuro::Hann\<T\>** window (to apply Hann window to the input data)
 
 Furthermore, the package provides a **rosneuro::FilterChain\<T\>** in order to dynamically concatenate differente filters.
 
 ## Requirements
 rosneuro_filters has been tested with the following configuration:
 - **Ubuntu 18.04.05 LTS Bionic Beaver** and **ROS Melodic**
-- **Ubuntu 20.04.02 LTS Focal Fossa** and **ROS Noetic**
+- **Ubuntu 20.04.05 LTS Focal Fossa** and **ROS Noetic**
 
 rosneuro_filters depends on:
 - [Eigen library](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+- [librtfilter](https://packages.debian.org/search?keywords=librtfilter-dev) [Only for Butterworth filter]
 
-rosneuro_filters depends on the following @rosneuro packages:
-- [rosneuro/rosneuro_msgs](https://github.com/rosneuro/rosneuro_msgs) 
-- [rosneuro/rosneuro_data](https://github.com/rosneuro/rosneuro_data) 
+
 
 ## Usage
-Once instanciated, a filter plugin creates a filter that can be applied to **NeuroData** with the provided type **T**. Each plugin has specific configuration parameters retrived from the nameserver. Once the configuration is succesfully done, the filter is applied through the function member *bool apply(const NeuroData/<T/>& data_in, NeuroData/<T/>& data_out)*. Here a partial example of the application of the filter **rosneuro::Car\<T\>** to random generated data:
+Once instanciated, a filter plugin creates a filter that can be applied to input data (**Eigen::Matrix\<T, Eigen::Dynamic, Eigen::Dynamic\>**) with the provided type **T**. Each plugin has specific configuration parameters that can be retrived from the nameserver or can be set manually. Once the filter is set, it can be applied through the function member *DynamicMatrix\<T\> apply(const DynamicMatrix\<T\>& in)*. Here a partial example of the application of the filter **rosneuro::Car\<T\>** to random generated data:
 
 ```cpp
 #include <ros/ros.h>
-#include "rosneuro_data/NeuroData.hpp"
 #include "rosneuro_filters/Car.hpp"
 
 int main(int argc, char** argv) {
 
 	ros::init(argc, argv, "car");
+	const int nsamples  = 512;
+	const int nchannels = 16;
 	
 	rosneuro::Filter<float>* car = new rosneuro::Car<float>();
-	if(car->configure("CarCfgTest") == false) {
-		ROS_ERROR("Car filter configuration failed");
-		return false;
-	}
-	ROS_INFO("Car filter configuration succeeded");
-
-	rosneuro::NeuroData<float> in(2, 3, "EEG");
-	rosneuro::NeuroData<float> out(2, 3, "EEG");
-			
-	Eigen::MatrixXf data = Eigen::MatrixXf::Random(2, 3);
-	std::cout<<data<<std::endl;
-	std::copy(data.data(), data.data() + data.size(), in.data());
-
-	if(car->apply(in, out) == false) {
-		std::cout<<"Car filter failed"<<std::endl;
-		ros::shutdown();
-		return -1;
-	}
+	Eigen::MatrixXf data   = Eigen::MatrixXf::Random(nsamples, nchannels);
+	
+	Eigen::MatrixXf output = car->apply(data);
 		
-	std::cout<<"Car filter succesfully applied"<<std::endl;
-	Eigen::Map<Eigen::MatrixXf> eout(out.data(), 2, 3);
-
-	std::cout<<eout<<std::endl;
+	ROS_INFO("[%s] Car filter succesfully applied", car->name().c_str());
 
 	return 0;
 }
 ```
-As noticed, the filter is configured through the function:
-```cpp
-if(car->configure("CarCfgTest") == false) {
-  ROS_ERROR("Car filter configuration failed");
-  return false;
-}
-```
-that takes as argument the name provided in the YAML configuration file:
-```
-CarCfgTest:
-  name: car
-  type: CarFilterFloat
-```
+As noticed, in this case the filter does not need configuration.
+
 ## Filter plugins
 The package provides different filter types. Herein, the list of the filters with the required parameters (as YAML file):
 
@@ -113,7 +84,7 @@ It applies the Laplacian derivation to the data. For each provided sample and fo
          ||
          N4
 ```
-It is **required** to provide the channel layout as parameter of the filter as well as the total number of channel in the *NeuroData*. The channel layout is defined as a matrix with the index of the channels and 0 in the other positions:
+It is **required** to provide the channel layout as parameter of the filter. The number of channels (*nchannels*) is optional: if it is not provided, the filter tries to deduce it from the layout (it considers the highest index as the number of channel. **Be carefull: this might be not true**). The channel layout is defined as a matrix with the index of the channels and 0 in the other positions:
 ```
 LaplacianCfgTest:
   name: laplacian
@@ -133,30 +104,26 @@ Each window filter applies a specific window to the provided data. The current a
 - **rosneuro::Hamming\<T\>** window
 - **rosneuro::Hann\<T\>** window
 
-Each window filter has a mandatory parameter that specifies the size of the window (number of samples).
+The provided window filters do not required mandatory parameters but the name and the type.
 ```
 BlackmanCfgTest:
   name: blackman
   type: BlackmanWindowFloat
-  params: {nsamples: 4}
 ```
 ```
 FlattopCfgTest:
   name: flattop
   type: FlattopWindowFloat
-  params: {nsamples: 4}
 ```
 ```
 HammingCfgTest:
   name: hamming
   type: HammingWindowFloat
-  params: {nsamples: 4}
 ```
 ```
 HannCfgTest:
   name: hann
   type: hannWindowFloat
-  params: {nsamples: 4}
 ```
 
 ## Filter chain
@@ -165,15 +132,16 @@ It is possible to concatenate different filters thanks to the class **rosneuro::
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <Eigen/Dense>
-#include "rosneuro_data/NeuroData.hpp"
 #include "rosneuro_filters/FilterChain.hpp"
 
 int main(int argc, char** argv) {
 
 
-	ros::init(argc, argv, "chain");
-	ros::NodeHandle nh;
-
+	ros::init(argc, argv, "filterchain");
+	
+	const int nsamples  = 512;
+	const int nchannels = 16;
+	
 	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
 	   ros::console::notifyLoggerLevelsChanged();
 	}
@@ -186,22 +154,11 @@ int main(int argc, char** argv) {
 	}
 	ROS_INFO("Chain configuration succeeded");
 
-	rosneuro::NeuroData<float> in(4, 3, "EEG");
-	rosneuro::NeuroData<float> out(4, 3, "EEG");
+	Eigen::MatrixXf data = Eigen::MatrixXf::Random(nsamples, nchannels);
 			
-	Eigen::MatrixXf data = Eigen::MatrixXf::Random(4, 3);
-	std::cout<<data<<std::endl;
-	std::copy(data.data(), data.data() + data.size(), in.data());
-
-	if(chain.apply(in, out) == false) {
-		ROS_INFO("Chain filter failed");
-		return -1;
-	}
+	Eigen::MatrixXf output = chain.apply(data);
 		
-	std::cout<<"Dc filter succesfully applied"<<std::endl;
-	Eigen::Map<Eigen::MatrixXf> eout(out.data(), 4, 3);
-
-	std::cout<<eout<<std::endl;
+	std::cout<<"Filter chain succesfully applied"<<std::endl;
 	
 	return 0;
 
@@ -215,10 +172,8 @@ ChainCfgTest:
       type: rosneuro_filters/CarFilterFloat
     - name: hann
       type: rosneuro_filters/HannWindowFloat
-      params: {nsamples: 4}
     - name: flattop
       type: rosneuro_filters/FlattopWindowFloat
-      params: {nsamples: 4}
 ```
 
 ## How to implement a custom rosneuro::Filter plugin
@@ -233,7 +188,7 @@ myfilters_package/
 	|- package.xml
 	|- plugin_myfilter.xml
 ```
-The *MyFilter* class derives from the *rosneuro::Filter* base class and it requires to implement the two pure virtual function members *bool apply(const NeuroData\<T\>& data_in, NeuroData\<T\>& data_out)* and *bool configure(void)*. Here an example of the implementation of the class in the *include/myfilters_package/MyFilter.hpp* file:
+The *MyFilter* class derives from the *rosneuro::Filter* base class and it requires to implement the two pure virtual function members *DynamicMatrix\<T\> apply(const DynamicMatrix\<T\>& in)* and *bool configure(void)*. Here an example of the implementation of the class in the *include/myfilters_package/MyFilter.hpp* file:
 ```cpp
 #ifndef ROSNEURO_MYFILTER_HPP
 #define ROSNEURO_MYFILTER_HPP
@@ -250,7 +205,7 @@ class MyFilter : public Filter<T> {
 		~MyFilter(void) {};
 
 		bool configure(void);
-		bool apply(const NeuroData<T>& data_in, NeuroData<T>& data_out);
+		DynamicMatrix<T> apply(const DynamicMatrix<T>& in);
 
 };
 
@@ -263,8 +218,7 @@ bool MyFilter<T>::configure(void) {
 }
 
 template<typename T>
-bool MyFilter<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out){
-
+DynamicMatrix<T> MyFilter<T>::apply(const DynamicMatrix<T>& in) {
 	// Specific implementation of MyFilter
 }
 
@@ -272,7 +226,7 @@ bool MyFilter<T>::apply(const NeuroData<T>& data_in, NeuroData<T>& data_out){
 
 #endif
 ```
-Notice that the function member *MyFilter/<T/>::configure(void)* is automatically called inside the method *rosneuro::Filter/<T/>::configure(const std::string& name)*. Therefore, in order to execute the function member *MyFilter/<T/>::configure(void)* is required to call the function *bool configure(const std::string& name)* in the executable with argument the name of the YAML structure.
+Notice that in the case of *FilterChain* the function member *MyFilter\<T\>::configure(void)* is automatically called inside the method *rosneuro::Filter\<T\>::configure(const std::string& name)*. Therefore, in order to execute the function member *MyFilter\<T\>::configure(void)* is required to call the function *bool configure(const std::string& name)* in the executable with argument the name of the YAML structure.
 
 In *src/MyFilter.cpp*, we just add the plugin macros:
 ```cpp
@@ -294,9 +248,7 @@ find_package(catkin REQUIRED COMPONENTS
 			 roscpp 
 			 roslib
 			 std_msgs
-			 pluginlib
-			 rosneuro_data
-			 rosneuro_msgs)
+			 pluginlib)
 find_package(PkgConfig)
 
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
@@ -311,8 +263,6 @@ catkin_package(
   	roscpp
 	std_msgs
 	pluginlib
-	rosneuro_data
-	rosneuro_msgs
   DEPENDS
 )
 
@@ -341,8 +291,8 @@ In the *package.xml* we need to add the dependency to the pluginlib package and 
   <name>myfilters_package</name>
   <version>0.0.1</version>
   <description>My filters package</description>
-  <author email="luca.tonin@dei.unipd.it">Luca Tonin</author>
-  <maintainer email="luca.tonin@dei.unipd.it">Luca Tonin</maintainer>
+  <author email="luca.tonin@unipd.it">Luca Tonin</author>
+  <maintainer email="luca.tonin@unipd.it">Luca Tonin</maintainer>
 
   <license>GPLv3</license>
 
@@ -351,8 +301,6 @@ In the *package.xml* we need to add the dependency to the pluginlib package and 
   <depend>std_msgs</depend>
   <depend>message_generation</depend>
 
-  <depend>rosneuro_data</depend>
-  <depend>rosneuro_msgs</depend>
   <exec_depend>message_runtime</exec_depend>
   <depend>eigen</depend>
   <depend>roslib</depend>
