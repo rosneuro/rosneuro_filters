@@ -38,7 +38,7 @@ catkin_package(
   ${PROJECT_NAME}_dc
   ${PROJECT_NAME}_laplacian
   ${PROJECT_NAME}_butterworth
-  #${PROJECT_NAME}_hann
+  ${PROJECT_NAME}_hann
   ${PROJECT_NAME}_hamming
   ${PROJECT_NAME}_blackman
   ${PROJECT_NAME}_flattop
@@ -86,11 +86,11 @@ target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES}
 												  ${catkin_LIBRARIES}
 )
 
-## Hann Window
-#add_library(${PROJECT_NAME}_hann src/Hann.cpp)
-#target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} 
-#										   ${catkin_LIBRARIES}
-#)
+# Hann Window
+add_library(${PROJECT_NAME}_hann src/Hann.cpp)
+target_link_libraries(${PROJECT_NAME}_hann ${Eigen3_LIBRARIES} 
+										   ${catkin_LIBRARIES}
+)
 
 # Hamming Window
 add_library(${PROJECT_NAME}_hamming src/Hamming.cpp)
@@ -144,6 +144,9 @@ target_link_libraries(flattop_window ${PROJECT_NAME}_flattop ${catkin_LIBRARIES}
 add_executable(hamming_window test/hamming_window.cpp)
 target_link_libraries(hamming_window ${PROJECT_NAME}_hamming ${catkin_LIBRARIES}) 
 
+add_executable(hann_window test/hann_window.cpp)
+target_link_libraries(hann_window ${PROJECT_NAME}_hann ${catkin_LIBRARIES}) 
+
 #################
 ##   Install   ##
 #################
@@ -151,7 +154,7 @@ install(TARGETS ${PROJECT_NAME}_car
 				${PROJECT_NAME}_dc
 				${PROJECT_NAME}_laplacian
 				${PROJECT_NAME}_butterworth
-				#${PROJECT_NAME}_hann
+				${PROJECT_NAME}_hann
 				${PROJECT_NAME}_hamming
 				${PROJECT_NAME}_flattop
 				${PROJECT_NAME}_blackman

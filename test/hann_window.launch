@@ -1,7 +1,7 @@
 <launch>	
 	<arg name="datapath"   default="$(find rosneuro_filters)"/>
 
-	<node name="flattop_window" pkg="rosneuro_filters" type="flattop_window" output="screen">
+	<node name="hann_window" pkg="rosneuro_filters" type="hann_window" output="screen">
 		<rosparam param="datapath"   subst_value="True">$(arg datapath)</rosparam>
 	
 	</node>
