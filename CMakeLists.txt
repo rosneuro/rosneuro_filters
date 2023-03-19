@@ -41,7 +41,7 @@ catkin_package(
   #${PROJECT_NAME}_hann
   #${PROJECT_NAME}_hamming
   ${PROJECT_NAME}_blackman
-  #${PROJECT_NAME}_flattop
+  ${PROJECT_NAME}_flattop
 	
   CATKIN_DEPENDS
   	roscpp
@@ -97,13 +97,13 @@ target_link_libraries(${PROJECT_NAME}_butterworth ${Eigen3_LIBRARIES}
 #target_link_libraries(${PROJECT_NAME}_hamming ${Eigen3_LIBRARIES} 
 #											  ${catkin_LIBRARIES}
 #)
-#
-## Flattop Window
-#add_library(${PROJECT_NAME}_flattop src/Flattop.cpp)
-#target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} 
-#											  ${catkin_LIBRARIES}
-#)
-#
+
+# Flattop Window
+add_library(${PROJECT_NAME}_flattop src/Flattop.cpp)
+target_link_libraries(${PROJECT_NAME}_flattop ${Eigen3_LIBRARIES} 
+											  ${catkin_LIBRARIES}
+)
+
 # Blackman Window
 add_library(${PROJECT_NAME}_blackman src/Blackman.cpp)
 target_link_libraries(${PROJECT_NAME}_blackman ${Eigen3_LIBRARIES} 
@@ -138,6 +138,9 @@ target_link_libraries(butterworth_simloop_chain ${PROJECT_NAME}_butterworth ${ca
 add_executable(blackman_window test/blackman_window.cpp)
 target_link_libraries(blackman_window ${PROJECT_NAME}_blackman ${catkin_LIBRARIES}) 
 
+add_executable(flattop_window test/flattop_window.cpp)
+target_link_libraries(flattop_window ${PROJECT_NAME}_flattop ${catkin_LIBRARIES}) 
+
 #################
 ##   Install   ##
 #################
@@ -147,7 +150,7 @@ install(TARGETS ${PROJECT_NAME}_car
 				${PROJECT_NAME}_butterworth
 				#${PROJECT_NAME}_hann
 				#${PROJECT_NAME}_hamming
-				#${PROJECT_NAME}_flattop
+				${PROJECT_NAME}_flattop
 				${PROJECT_NAME}_blackman
 
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

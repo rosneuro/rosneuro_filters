@@ -1,14 +1,14 @@
 #include <ros/ros.h>
 #include "rosneuro_filters/rosneuro_filters_utilities.hpp"
-#include "rosneuro_filters/Blackman.hpp"
+#include "rosneuro_filters/Flattop.hpp"
 
 int main(int argc, char** argv) {
 
-	ros::init(argc, argv, "blackman_window");
+	ros::init(argc, argv, "flattop_window");
 	
 	std::string datapath;
 	
-	rosneuro::Filter<double>* blackman = new rosneuro::Blackman<double>();
+	rosneuro::Filter<double>* flattop = new rosneuro::Flattop<double>();
 
 	if(ros::param::get("~datapath", datapath) == false) {
 		ROS_ERROR("Cannot find 'datapath' parameter");
@@ -16,21 +16,21 @@ int main(int argc, char** argv) {
 	}
 	
 	const std::string fileinput = datapath + "/test/rawdata.csv";
-	const std::string fileout   = datapath + "/test/blackman_window.csv";
+	const std::string fileout   = datapath + "/test/flattop_window.csv";
 	
 	// Load input data
 	rosneuro::DynamicMatrix<double> input = readCSV<double>(fileinput);
 	
 	// Allocate time variables
-	ros::WallTime start_blackman, stop_blackman;
+	ros::WallTime start_flattop, stop_flattop;
 
 	// Apply the filter
 	ROS_INFO("Applying filter");
-	start_blackman = ros::WallTime::now();
-	rosneuro::DynamicMatrix<double> output = blackman->apply(input);
-	stop_blackman = ros::WallTime::now();
+	start_flattop = ros::WallTime::now();
+	rosneuro::DynamicMatrix<double> output = flattop->apply(input);
+	stop_flattop = ros::WallTime::now();
 
-	ROS_INFO("Blackman applied on data in %9.6f ms", ((stop_blackman-start_blackman).toNSec())/1000.0f);
+	ROS_INFO("Flattop applied on data in %9.6f ms", ((stop_flattop-start_flattop).toNSec())/1000.0f);
 
 	// Writing the filtered data
 	writeCSV<double>(fileout, output);
