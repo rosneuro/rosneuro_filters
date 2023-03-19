@@ -1,8 +1,0 @@
-ButterworthCfgTest:
-  name: butterworth
-  type: ButterworthFilterFloat
-  params: 
-    order: 4
-    samplerate: 512
-    type: lowpass
-    cutoff: 5

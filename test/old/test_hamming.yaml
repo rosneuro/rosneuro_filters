@@ -1,4 +1,0 @@
-HammingCfgTest:
-  name: hamm
-  type: HammingWindowFloat
-  params: {nsamples: 4}

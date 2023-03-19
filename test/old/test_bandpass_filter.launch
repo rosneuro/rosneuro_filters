@@ -1,4 +1,0 @@
-<launch>	
-	<rosparam command="load" file="$(find rosneuro_filters)/test/test_bandpass_filter.yaml"/>
-	<node name="test_bandpass_filter" pkg="rosneuro_filters" type="test_bandpass_filter" output="screen"/>
-</launch>

@@ -1,4 +1,0 @@
-BlackmanCfgTest:
-  name: blackman
-  type: BlackmanWindowFloat
-  params: {nsamples: 4}

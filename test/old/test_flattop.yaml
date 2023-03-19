@@ -1,4 +1,0 @@
-FlattopCfgTest:
-  name: flattop
-  type: FlattopWindowFloat
-  params: {nsamples: 4}

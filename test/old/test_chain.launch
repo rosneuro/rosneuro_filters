@@ -1,4 +1,0 @@
-<launch>	
-  <rosparam command="load" file="$(find rosneuro_filters)/test/test_chain.yaml"/>
-  <node name="test_chain" pkg="rosneuro_filters" type="test_chain" output="screen"/>
-</launch>
