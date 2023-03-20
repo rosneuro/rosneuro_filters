@@ -2,18 +2,18 @@
 The package provides a generic interface **rosneuro::Filter\<T\>** to implement filters to be applied to the input data *[samples x channels]*. The assumption is that filter implemented using this interface will not change the dimension of the input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, **ROS-Neuro** provides the following plugins:
 
 #### Temporal filters:
-- [rosneuro_filters_dc](xxxx) (simple filter to remove the DC component from the data)
-- [rosneuro_filters_butterworth](xxxx) (butterworth realt-time filter to low- and high-pass the data) 
+- [rosneuro_filters_dc](https://github.com/rosneuro/rosneuro_filters_dc) (simple filter to remove the DC component from the data)
+- [rosneuro_filters_butterworth](https://github.com/rosneuro/rosneuro_filters_butterworth) (butterworth realt-time filter to low- and high-pass the data) 
 
 #### Spatial filters
-- [rosneuro_filters_car](xxxx) (Common Average Reference filter to remove the average component from the data)
-- [rosneuro_filters_laplacian](xxxx) (filter to apply Laplacian derivation to the data)
+- [rosneuro_filters_car](https://github.com/rosneuro/rosneuro_filters_car) (Common Average Reference filter to remove the average component from the data)
+- [rosneuro_filters_laplacian](https://github.com/rosneuro/rosneuro_filters_laplacian) (filter to apply Laplacian derivation to the data)
 
 #### Windows
-- [rosneuro_filters_blackman](xxxx) (Blackman window to input data)
-- [rosneuro_filters_flattop](xxxx) (Flattop window to the input data)
-- [rosneuro_filters_hamming](xxxx) (Hamming window to the input data)
-- [rosneuro_filters_hann](xxxx) (Hann window to the input data)
+- [rosneuro_filters_blackman](https://github.com/rosneuro/rosneuro_filters_blackman) (Blackman window to input data)
+- [rosneuro_filters_flattop](https://github.com/rosneuro/rosneuro_filters_flattop) (Flattop window to the input data)
+- [rosneuro_filters_hamming](https://github.com/rosneuro/rosneuro_filters_hamming) (Hamming window to the input data)
+- [rosneuro_filters_hann](https://github.com/rosneuro/rosneuro_filters_hann) (Hann window to the input data)
 
 Furthermore, the package provides a **rosneuro::FilterChain\<T\>** in order to dynamically concatenate differente filters.
 
