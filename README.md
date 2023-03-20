@@ -25,6 +25,31 @@ rosneuro_filters has been tested with the following configuration:
 rosneuro_filters depends on:
 - [Eigen library](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 
+## Usage
+Once instanciated, a filter plugin creates a filter that can be applied to input data (**Eigen::Matrix\<T, Eigen::Dynamic, Eigen::Dynamic\>**) with the provided type **T**. Each plugin has specific configuration parameters that can be retrived from the nameserver or can be set manually. Once the filter is set, it can be applied through the function member *DynamicMatrix\<T\> apply(const DynamicMatrix\<T\>& in)*. Here a partial example of the application of the filter **rosneuro::Car\<T\>** to random generated data:
+
+```cpp
+#include <ros/ros.h>
+#include "rosneuro_filters/Car.hpp"
+
+int main(int argc, char** argv) {
+
+	ros::init(argc, argv, "car");
+	const int nsamples  = 512;
+	const int nchannels = 16;
+	
+	rosneuro::Filter<float>* car = new rosneuro::Car<float>();
+	Eigen::MatrixXf data   = Eigen::MatrixXf::Random(nsamples, nchannels);
+	
+	Eigen::MatrixXf output = car->apply(data);
+		
+	ROS_INFO("[%s] Car filter succesfully applied", car->name().c_str());
+
+	return 0;
+}
+```
+As noticed, in this case the filter does not need configuration.
+
 ## Filter chain
 It is possible to concatenate different filters thanks to the class **rosneuro::FilterChain\<T\>**. Here an example of the filter concatenation and the related YAML configuration file:
 ```cpp
