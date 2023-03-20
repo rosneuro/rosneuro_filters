@@ -1,5 +1,5 @@
-# ROSNeuro Filters package
-The package provides a generic interface **rosneuro::Filter\<T\>** to implement filters to be applied to the input data *[samples x channels]*. The assumption is that filter implemented using this interface will not change the dimension of the input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, **ROSNeuro** provides the following plugins:
+# ROS-Neuro Filters package
+The package provides a generic interface **rosneuro::Filter\<T\>** to implement filters to be applied to the input data *[samples x channels]*. The assumption is that filter implemented using this interface will not change the dimension of the input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, **ROS-Neuro** provides the following plugins:
 
 #### Temporal filters:
 - [rosneuro_filters_dc](xxxx) (simple filter to remove the DC component from the data)
