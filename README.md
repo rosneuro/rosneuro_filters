@@ -30,7 +30,7 @@ Once instanciated, a filter plugin creates a filter that can be applied to input
 
 ```cpp
 #include <ros/ros.h>
-#include "rosneuro_filters/Car.hpp"
+#include "rosneuro_filters_car/Car.hpp"
 
 int main(int argc, char** argv) {
 
