@@ -1,4 +1,4 @@
-# ROSNeuro Filters package
+# ROS-Neuro Filters package
 The package provides a generic interface to implement filters to be applied on input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, the package provides the following plugins:
 
 #### Temporal filters
