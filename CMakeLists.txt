@@ -47,10 +47,15 @@ catkin_package(
 # Build
 ##############################################################################
 
+include_directories(${catkin_INCLUDE_DIRS} 
+                    ${EIGEN3_INCLUDE_DIRS}
+					include)
+
 add_definitions(${EIGEN3_DEFINITIONS})
 
 add_library(${PROJECT_NAME} src/Filter.cpp
 							src/FilterChain.cpp)
+
 target_link_libraries(${PROJECT_NAME} ${Eigen3_LIBRARIES} 
 									  ${catkin_LIBRARIES})
 
