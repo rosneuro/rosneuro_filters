@@ -1,24 +1,29 @@
 # ROSNeuro Filters package
-The package provides a generic interface to implement filters to be applied to the data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, the package provides the following plugins:
+The package provides a generic interface **rosneuro::Filter\<T\>** to implement filters to be applied to the input data *[samples x channels]*. The assumption is that filter implemented using this interface will not change the dimension of the input data. Different types of filters can be independently developed and dynamically loaded through the interface. Currently, **ROSNeuro** provides the following plugins:
 
-#### Temporal filters
-- **rosneuro::Dc\<T\>** filter (to remove the DC component)
-- **rosneuro::Butterworth\<T\>** butterworth filter for low-pass and high-pass 
+#### Temporal filters:
+- [rosneuro_filters_dc](xxxx) (simple filter to remove the DC component from the data)
+- [rosneuro_filters_butterworth](xxxx) (butterworth realt-time filter to low- and high-pass the data) 
 
 #### Spatial filters
-- **rosneuro::Car\<T\>** filter (to apply a Common Average Reference filter)
-- **rosneuro::Laplacian\<T\>** filter (to apply Laplacian derivation to the)
+- [rosneuro_filters_car](xxxx) (Common Average Reference filter to remove the average component from the data)
+- [rosneuro_filters_laplacian](xxxx) (filter to apply Laplacian derivation to the data)
+
+#### Windows
+- [rosneuro_filters_blackman](xxxx) (Blackman window to input data)
+- [rosneuro_filters_flattop](xxxx) (Flattop window to the input data)
+- [rosneuro_filters_hamming](xxxx) (Hamming window to the input data)
+- [rosneuro_filters_hann](xxxx) (Hann window to the input data)
 
 Furthermore, the package provides a **rosneuro::FilterChain\<T\>** in order to dynamically concatenate differente filters.
 
 ## Requirements
 rosneuro_filters has been tested with the following configuration:
 - **Ubuntu 18.04.05 LTS Bionic Beaver** and **ROS Melodic**
-- **Ubuntu 20.04.02 LTS Focal Fossa** and **ROS Noetic**
+- **Ubuntu 20.04.05 LTS Focal Fossa** and **ROS Noetic**
 
 rosneuro_filters depends on:
 - [Eigen library](https://eigen.tuxfamily.org/index.php?title=Main_Page)
-- [librtfilter-dev](https://neuro.debian.net/pkgs/librtfilter-dev.html)
 
 ## TODO 
 
