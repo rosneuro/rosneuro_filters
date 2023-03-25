@@ -3,6 +3,8 @@
 
 #include <string>
 #include <map>
+#include <Eigen/Dense>
+
 #include <ros/ros.h>
 
 namespace rosneuro {
