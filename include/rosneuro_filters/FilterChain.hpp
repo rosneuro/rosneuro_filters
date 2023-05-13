@@ -1,5 +1,5 @@
-#ifndef ROSNEURO_FILTERS_FILTERCHAIN_HPP
-#define ROSNEURO_FILTERS_FILTERCHAIN_HPP
+#ifndef ROSNEURO_FILTERS_FILTERCHAIN_HPP_
+#define ROSNEURO_FILTERS_FILTERCHAIN_HPP_
 
 #include <vector>
 #include <memory>
@@ -59,17 +59,18 @@ FilterChain<T>::~FilterChain(void) {
 	delete this->loader_;
 }
 
-template<>
+
+template<> inline
 std::string FilterChain<float>::get_baseclass_name(void) {
 	return "rosneuro::Filter<float>";
 }
 
-template<>
+template<> inline
 std::string FilterChain<double>::get_baseclass_name(void) {
 	return "rosneuro::Filter<double>";
 }
 
-template<>
+template<> inline
 std::string FilterChain<int>::get_baseclass_name(void) {
 	return "rosneuro::Filter<int>";
 }
@@ -121,9 +122,9 @@ bool FilterChain<T>::configure(const std::string param_name, ros::NodeHandle nh)
 	if(nh.getParam(param_name + "/filters_chain", config)) {
 		std::string resolved_name = nh.resolveName(param_name).c_str();
 	} else if(!nh.getParam(param_name, config)) {
-		ROS_DEBUG("Could not load the filter chain configuration from parameter %s, are you sure it was pushed to the parameter server? Assuming that you meant to leave it empty.", param_name.c_str());
-		configured_ = true;
-		return true;
+		ROS_WARN("Could not load the filter chain configuration from parameter \'%s\', are you sure it was pushed to the parameter server? Assuming that you meant to leave it empty.", param_name.c_str());
+		configured_ = false;
+		return false;
 	}
 
 	return this->configure(config, nh.getNamespace());
