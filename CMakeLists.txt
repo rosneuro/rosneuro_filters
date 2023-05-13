@@ -54,10 +54,14 @@ include_directories(${catkin_INCLUDE_DIRS}
 add_definitions(${EIGEN3_DEFINITIONS})
 
 add_library(${PROJECT_NAME} src/Filter.cpp
-							src/FilterChain.cpp)
+							src/FilterChain.cpp
+							src/FilterChainNode.cpp)
 
 target_link_libraries(${PROJECT_NAME} ${Eigen3_LIBRARIES} 
 									  ${catkin_LIBRARIES})
+
+add_executable(filterchain_node src/filterchain_node.cpp)
+target_link_libraries(filterchain_node ${PROJECT_NAME} ${catkin_LIBRARIES}) 
 
 
 #################
@@ -70,4 +74,8 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS filterchain_node 
+	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
