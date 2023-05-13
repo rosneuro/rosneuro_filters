@@ -25,7 +25,69 @@ rosneuro_filters has been tested with the following configuration:
 rosneuro_filters depends on:
 - [Eigen library](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 
-## Usage
+## FilterChain Node
+The package provides a **filterchain_node** executable that spawn a node. The node takes as input a **rosneuro_msgs::NeuroFrame** and publish again a new **rosneuro_msgs::NeuroFrame** with the applied filters. The filterchain can be configured via YAML file.
+
+### Subscribed topic:
+- ```/neurodata``` ([rosneuro_msgs/NeuroFrame](https://github.com/rosneuro/rosneuro_msgs))
+
+Input data for the filterchain.
+  
+### Published topic:
+- ```/neurodata_filtered``` ([rosneuro_msgs/NeuroFrame](https://github.com/rosneuro/rosneuro_msgs) 
+
+Output data after filters have been applied.
+
+### Parameters:
+- ```configname``` (```string```, default: ```filterchain```) 
+
+Root element of the YAML configuration file.
+
+### Example of YAML file (e.g., myfilterchain.yaml)
+
+```
+MyFilterChain:
+    - name: butterworth-lowpass
+      type: rosneuro_filters/ButterworthFilterFloat
+      params: 
+        samplerate: 512
+        type: lowpass
+        order: 2
+        cutoff: 40
+    - name: butterworth-highpass
+      type: rosneuro_filters/ButterworthFilterFloat
+      params: 
+        samplerate: 512
+        type: highpass
+        order: 2
+        cutoff: 1
+    - name: car
+      type: rosneuro_filters/CarFilterFloat
+```
+In this case, the filter chain is composed by:
+1. A butterworth lowpass filter with order 2 and cutoff 40 Hz
+2. A butterworth highpass filter with order 2 and cutoff 1 Hz
+3. A common average reference filter (CAR)
+
+The YAML file must be load in the parameter server (see next section).
+
+### Example of launch file
+```xml
+<?xml version="1.0"?>
+<launch>
+	<rosparam command="load" file="myfilterchain.yaml"/>
+	<node name="filterchain_node" pkg="rosneuro_filters" type="filterchain_node" output="screen" >
+		<param name="configname" value="MyFilterChain" />
+	</node>	
+</launch>
+```
+
+The ```rosparam``` command loads the given YAML file in the parameter server. Within the node workspace we pass also the name of the root element of the YAML structure (in this case: ```MyFilterChain```). 
+
+**Notice that if ```configname``` is not provided the chain will use the default value (```filterchain```) and thus, the name of the root element in the YAML file must be changed accordingly.**
+
+
+## Usage of Filters in C++
 Once instanciated, a filter plugin creates a filter that can be applied to input data (**Eigen::Matrix\<T, Eigen::Dynamic, Eigen::Dynamic\>**) with the provided type **T**. Each plugin has specific configuration parameters that can be retrived from the nameserver or can be set manually. Once the filter is set, it can be applied through the function member *DynamicMatrix\<T\> apply(const DynamicMatrix\<T\>& in)*. Here a partial example of the application of the filter **rosneuro::Car\<T\>** to random generated data:
 
 ```cpp
