@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 			 roslib
 			 rosconsole
 			 std_msgs
+			 rosneuro_msgs
 			 pluginlib)
 
 find_package(Eigen3 REQUIRED)
@@ -38,6 +39,7 @@ catkin_package(
 	roslib
 	rosconsole
 	std_msgs
+	rosneuro_msgs
 	pluginlib
   DEPENDS
 )

@@ -17,6 +17,7 @@
   <depend>eigen</depend>
   <depend>roslib</depend>
   <depend>rosconsole</depend>
+  <depend>rosneuro_msgs</depend>  
   <build_depend>pluginlib</build_depend>
   <exec_depend>pluginlib</exec_depend>
 	  
