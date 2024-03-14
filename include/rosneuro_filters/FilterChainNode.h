@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <rosneuro_msgs/NeuroFrame.h>
+#include <gtest/gtest_prod.h>
 #include "rosneuro_filters/FilterChain.h"
 
 namespace rosneuro {
@@ -28,6 +29,10 @@ class FilterChainNode {
 		std::string 	cfg_name_;
 		FilterChain<float> chain_;
 		rosneuro_msgs::NeuroFrame neuromsg_;
+
+        FRIEND_TEST(FilterChainNodeTest, ConstructorTest);
+        FRIEND_TEST(FilterChainNodeTest, ConfigureSuccessTest);
+        FRIEND_TEST(FilterChainNodeTest, ReceivedNeurodataTest);
 };
 
 

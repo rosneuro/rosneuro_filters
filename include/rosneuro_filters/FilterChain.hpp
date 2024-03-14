@@ -6,6 +6,7 @@
 #include <ros/ros.h>
 #include <pluginlib/class_loader.h>
 #include "rosneuro_filters/Filter.hpp"
+#include <gtest/gtest_prod.h>
 
 namespace rosneuro {
 
@@ -34,6 +35,13 @@ class FilterChain {
 		DynamicMatrix<T> buffer0_;
 		DynamicMatrix<T> buffer1_;
 
+        FRIEND_TEST(FilterChainTestSuite, ConstructorTest);
+        FRIEND_TEST(FilterChainTestSuite, DestructorTest);
+        FRIEND_TEST(FilterChainTestSuite, GetBaseClassName);
+        FRIEND_TEST(FilterChainTestSuite, EmptyConfiguration);
+        FRIEND_TEST(FilterChainTestSuite, InvalidTypeInConfiguration);
+        FRIEND_TEST(FilterChainTestSuite, ValidConfiguration);
+        FRIEND_TEST(FilterChainTestSuite, ConfigureTest);
 };
 
 template<typename T>
@@ -205,7 +213,7 @@ bool FilterChain<T>::configure(XmlRpc::XmlRpcValue& config, const std::string& f
   		}
 	}
 
-	bool result = true;    
+	bool result = true;
 
    	for (int i = 0; i < config.size(); ++i) {
   

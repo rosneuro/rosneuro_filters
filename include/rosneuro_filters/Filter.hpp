@@ -1,6 +1,8 @@
 #ifndef ROSNEURO_FILTERS_FILTER_HPP
 #define ROSNEURO_FILTERS_FILTER_HPP
 
+/*TODO: DUPLICATED CODE FROM ROSNEURO_BUFFER, TO BE MOVED TO A COMMON LIBRARY*/
+
 #include <string>
 #include <map>
 #include <Eigen/Dense>
@@ -51,6 +53,8 @@ class Filter {
 	private:
 		bool setNameAndType(XmlRpc::XmlRpcValue& config);
 		ros::NodeHandle nh_;
+
+        FRIEND_TEST(FilterTestSuite, SetNameAndType);
 };
 
 
