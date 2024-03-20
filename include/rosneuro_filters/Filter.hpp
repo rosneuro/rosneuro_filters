@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 #include <Eigen/Dense>
-
+#include <gtest/gtest_prod.h>
 #include <ros/ros.h>
 
 namespace rosneuro {

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <gtest/gtest_prod.h>
 #include "Filter.hpp"
 
 namespace rosneuro {
