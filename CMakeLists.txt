@@ -76,7 +76,7 @@ add_library(${PROJECT_NAME} src/Filter.cpp
 target_link_libraries(${PROJECT_NAME} ${Eigen3_LIBRARIES} 
 									  ${catkin_LIBRARIES})
 
-add_executable(filterchain_node src/filterchain_node.cpp)
+add_executable(filterchain_node example/RunFilterChainNode.cpp)
 target_link_libraries(filterchain_node ${PROJECT_NAME} ${catkin_LIBRARIES}) 
 
 
