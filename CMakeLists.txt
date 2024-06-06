@@ -42,30 +42,26 @@ catkin_package(
   DEPENDS
 )
 
-
 ##############################################################################
-# Build
+# Test
 ##############################################################################
 
 catkin_add_gtest(TestFilter test/TestFilter.cpp)
 target_link_libraries(TestFilter ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
 target_link_libraries(TestFilter ${PROJECT_NAME} ${catkin_LIBRARIES})
-include_directories(${GTEST_INCLUDE_DIRS} gmock pthread)
 
 catkin_add_gtest(TestFilterChain test/TestFilterChain.cpp)
 target_link_libraries(TestFilterChain ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
 target_link_libraries(TestFilterChain ${PROJECT_NAME} ${catkin_LIBRARIES})
-include_directories(${GTEST_INCLUDE_DIRS} gmock pthread)
 
 catkin_add_gtest(TestFilterChainNode test/TestFilterChainNode.cpp)
 target_link_libraries(TestFilterChainNode ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
 target_link_libraries(TestFilterChainNode ${PROJECT_NAME} ${catkin_LIBRARIES})
-include_directories(${GTEST_INCLUDE_DIRS} gmock pthread)
+include_directories(${GTEST_INCLUDE_DIRS} gmock pthread include/${PROJECT_NAME}/)
 
-include_directories(${catkin_INCLUDE_DIRS}
-                    ${EIGEN3_INCLUDE_DIRS}
-					include
-					include/${PROJECT_NAME}/)
+##############################################################################
+# Build
+##############################################################################
 
 add_definitions(${EIGEN3_DEFINITIONS})
 
