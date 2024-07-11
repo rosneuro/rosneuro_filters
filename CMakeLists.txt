@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 			 pluginlib)
 
 find_package(Eigen3 REQUIRED)
-
+find_package(GTest REQUIRED)
 find_package(PkgConfig)
 
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
@@ -42,14 +42,26 @@ catkin_package(
   DEPENDS
 )
 
+##############################################################################
+# Test
+##############################################################################
+
+catkin_add_gtest(TestFilter test/TestFilter.cpp)
+target_link_libraries(TestFilter ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
+target_link_libraries(TestFilter ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+catkin_add_gtest(TestFilterChain test/TestFilterChain.cpp)
+target_link_libraries(TestFilterChain ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
+target_link_libraries(TestFilterChain ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+catkin_add_gtest(TestFilterChainNode test/TestFilterChainNode.cpp)
+target_link_libraries(TestFilterChainNode ${GTEST_BOTH_LIBRARIES} pthread gmock ${Eigen3_LIBRARIES})
+target_link_libraries(TestFilterChainNode ${PROJECT_NAME} ${catkin_LIBRARIES})
+include_directories(${GTEST_INCLUDE_DIRS} gmock pthread include/${PROJECT_NAME}/)
 
 ##############################################################################
 # Build
 ##############################################################################
-
-include_directories(${catkin_INCLUDE_DIRS} 
-                    ${EIGEN3_INCLUDE_DIRS}
-					include)
 
 add_definitions(${EIGEN3_DEFINITIONS})
 
@@ -60,7 +72,7 @@ add_library(${PROJECT_NAME} src/Filter.cpp
 target_link_libraries(${PROJECT_NAME} ${Eigen3_LIBRARIES} 
 									  ${catkin_LIBRARIES})
 
-add_executable(filterchain_node src/filterchain_node.cpp)
+add_executable(filterchain_node example/RunFilterChainNode.cpp)
 target_link_libraries(filterchain_node ${PROJECT_NAME} ${catkin_LIBRARIES}) 
 
 

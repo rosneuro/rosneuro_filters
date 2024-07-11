@@ -4,289 +4,281 @@
 #include <string>
 #include <map>
 #include <Eigen/Dense>
-
+#include <gtest/gtest_prod.h>
 #include <ros/ros.h>
 
 namespace rosneuro {
+    template<typename T> using DynamicMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
-template<typename T> using DynamicMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+    template <typename T>
+    class Filter {
+        public:
+            Filter(void) : configured_(false) {};
+            virtual ~Filter(void) {};
 
-template <typename T>
-class Filter {
-	public:
-		Filter(void) : configured_(false) {};
-		virtual ~Filter(void) {};
-		
-		virtual bool configure(void) = 0;
-		virtual DynamicMatrix<T> apply(const DynamicMatrix<T>& in) = 0;
+            virtual bool configure(void) = 0;
+            virtual DynamicMatrix<T> apply(const DynamicMatrix<T>& in) = 0;
+            virtual void dump(void);
+            bool configure(const std::string& param_name);
+            bool configure(XmlRpc::XmlRpcValue& config);
+            std::string type(void) const;
+            std::string name(void) const;
 
-		virtual void dump(void);
+            bool getParam(const std::string& name, std::string& value) const;
+            bool getParam(const std::string& name, bool& value) const;
+            bool getParam(const std::string& name, double& value) const;
+            bool getParam(const std::string& name, int& value) const;
+            bool getParam(const std::string& name, unsigned  int& value) const;
+            bool getParam(const std::string& name, std::vector<double>& value) const;
+            bool getParam(const std::string& name, std::vector<std::string>& value) const;
+            bool getParam(const std::string& name, XmlRpc::XmlRpcValue& value) const;
 
-	protected:
-		bool configured_;
-		std::string type_;
-		std::string name_;
+        protected:
+            bool loadConfiguration(XmlRpc::XmlRpcValue& config);
+            std::map<std::string, XmlRpc::XmlRpcValue> params_;
 
-	// Configuration stuff - To be moved to friend class
-	public:
-		bool configure(const std::string& param_name);
-		bool configure(XmlRpc::XmlRpcValue& config);
-		std::string type(void) const;
-		std::string name(void) const;
+            bool configured_;
+            std::string type_;
+            std::string name_;
 
+        private:
+            bool setNameAndType(XmlRpc::XmlRpcValue& config);
+            ros::NodeHandle nh_;
 
-		bool getParam(const std::string& name, std::string& value) const;
-		bool getParam(const std::string& name, bool& value) const;
-		bool getParam(const std::string& name, double& value) const;
-		bool getParam(const std::string& name, int& value) const;
-		bool getParam(const std::string& name, unsigned  int& value) const;
-		bool getParam(const std::string& name, std::vector<double>& value) const;
-		bool getParam(const std::string& name, std::vector<std::string>& value) const;
-		bool getParam(const std::string& name, XmlRpc::XmlRpcValue& value) const;
+            FRIEND_TEST(FilterTestSuite, SetNameAndType);
+            FRIEND_TEST(FilterTestSuite, GetParamString);
+            FRIEND_TEST(FilterTestSuite, GetParamBool);
+            FRIEND_TEST(FilterTestSuite, GetParamDouble);
+            FRIEND_TEST(FilterTestSuite, GetParamInt);
+            FRIEND_TEST(FilterTestSuite, GetParamUnsignedInt);
+            FRIEND_TEST(FilterTestSuite, GetParamVectorDouble);
+            FRIEND_TEST(FilterTestSuite, GetParamVectorString);
+            FRIEND_TEST(FilterTestSuite, GetParamXmlRpcValue);
+    };
 
-	protected:
-		bool loadConfiguration(XmlRpc::XmlRpcValue& config);
-		std::map<std::string, XmlRpc::XmlRpcValue> params_;
+    template<typename T>
+    std::string Filter<T>::type(void) const {
+        return this->type_;
+    }
 
-	private:
-		bool setNameAndType(XmlRpc::XmlRpcValue& config);
-		ros::NodeHandle nh_;
-};
+    template<typename T>
+    std::string Filter<T>::name(void) const {
+        return this->name_;
+    }
 
+    template<typename T>
+    void Filter<T>::dump(void) {
+        printf("===================================================\n");
+        printf("[%s] - Filter configuration:\n", this->name().c_str());
+        printf("===================================================\n");
+        printf("\tDumping configuration not implemented for %s\n", this->name().c_str());
 
-template<typename T>
-std::string Filter<T>::type(void) const {
-	return this->type_;
-}
+        printf("\n");
+    }
 
-template<typename T>
-std::string Filter<T>::name(void) const {
-	return this->name_;
-}
+    template<typename T>
+    bool Filter<T>::setNameAndType(XmlRpc::XmlRpcValue& config) {
 
-template<typename T>
-void Filter<T>::dump(void) {
+        if(!config.hasMember("name")) {
+            ROS_ERROR("Filter didn't have name defined, this is required");
+            return false;
+        }
 
-	printf("===================================================\n");
-	printf("[%s] - Filter configuration:\n", this->name().c_str());
-	printf("===================================================\n");
-	printf("\tDumping configuration not implemented for %s\n", this->name().c_str());
-	
-	printf("\n");
-}
+        if(!config.hasMember("type")) {
+            ROS_ERROR("Filter didn't have type defined, this is required");
+            return false;
+        }
 
-/*** Configure stuff - To be moved to friend class **/
-template<typename T>
-bool Filter<T>::setNameAndType(XmlRpc::XmlRpcValue& config) {
+        this->name_ = std::string(config["name"]);
+        this->type_ = std::string(config["type"]);
+        ROS_DEBUG("Configuring Filter of type: %s with name %s", this->type_.c_str(), this->name_.c_str());
 
-	if(config.hasMember("name") == false) {
-		ROS_ERROR("Filter didn't have name defined, this is required");
-		return false;
-	}
-	
-	if(config.hasMember("type") == false) {
-		ROS_ERROR("Filter didn't have type defined, this is required");
-		return false;
-	}
+        return true;
+    }
 
-	this->name_ = std::string(config["name"]);
-	this->type_ = std::string(config["type"]);
-	ROS_DEBUG("Configuring Filter of type: %s with name %s", this->type_.c_str(), this->name_.c_str());
-    
-	return true;
-}
+    template<typename T>
+    bool Filter<T>::configure(const std::string& param_name) {
 
-template<typename T>
-bool Filter<T>::configure(const std::string& param_name) {
-	
-	bool retval = false;
-	XmlRpc::XmlRpcValue config;
-	if (!this->nh_.getParam(param_name, config)) {
-  		ROS_ERROR("Could not find parameter %s on the server, are you sure that it was pushed up correctly?", param_name.c_str());
-		return false;
-	}
+        bool retval = false;
+        XmlRpc::XmlRpcValue config;
+        if (!this->nh_.getParam(param_name, config)) {
+            ROS_ERROR("Could not find parameter %s on the server, are you sure that it was pushed up correctly?", param_name.c_str());
+            return false;
+        }
 
-	retval = this->configure(config);
-	return retval;
-}
+        retval = this->configure(config);
+        return retval;
+    }
 
-template<typename T>
-bool Filter<T>::configure(XmlRpc::XmlRpcValue& config) {
-	if (configured_) {
-		ROS_ERROR("Filter %s of type %s already being reconfigured", this->name_.c_str(), this->type_.c_str());
-	}
-	this->configured_ = false;
-	bool retval = true;
-	
-	retval = retval && this->loadConfiguration(config);
-	retval = retval && this->configure();
-	configured_ = retval;
-	return retval;
-}
+    template<typename T>
+    bool Filter<T>::configure(XmlRpc::XmlRpcValue& config) {
+        if (configured_) {
+            ROS_ERROR("Filter %s of type %s already being reconfigured", this->name_.c_str(), this->type_.c_str());
+        }
+        this->configured_ = false;
+        bool retval = true;
 
-template<typename T>
-bool Filter<T>::loadConfiguration(XmlRpc::XmlRpcValue& config) {
-	
-	if(config.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-		ROS_ERROR("A filter configuration must be a map with fields name, type, and params");
-		return false;
-	} 
-  
-	if (!setNameAndType(config)) {
-		return false;
-	}
+        retval = retval && this->loadConfiguration(config);
+        retval = retval && this->configure();
+        configured_ = retval;
+        return retval;
+    }
 
-	//check to see if we have parameters in our list
-	if(config.hasMember("params")) {
-  		
-		//get the params map
-  		XmlRpc::XmlRpcValue params = config["params"];
+    template<typename T>
+    bool Filter<T>::loadConfiguration(XmlRpc::XmlRpcValue& config) {
 
-		if(params.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-    		ROS_ERROR("params must be a map");
-			return false;
-		} else {
-    	
-			//Load params into map
-    		for(XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it) {
-      			ROS_DEBUG("Loading param %s", it->first.c_str());
-      			this->params_[it->first] = it->second;
-			}
-		}
-	}
+        if(config.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+            ROS_ERROR("A filter configuration must be a map with fields name, type, and params");
+            return false;
+        }
 
-	return true;
-}
+        if (!setNameAndType(config)) {
+            return false;
+        }
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, std::string& value) const {
-    
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
+        if(config.hasMember("params")) {
+            XmlRpc::XmlRpcValue params = config["params"];
+            if(params.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+                ROS_ERROR("params must be a map");
+                return false;
+            } else {
+                for(XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it) {
+                    ROS_DEBUG("Loading param %s", it->first.c_str());
+                    this->params_[it->first] = it->second;
+                }
+            }
+        }
 
-    if(it->second.getType() != XmlRpc::XmlRpcValue::TypeString)
-		return false;
+        return true;
+    }
 
-    auto tmp = it->second;
-    value = std::string(tmp);
-    return true;
-}
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, std::string& value) const {
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, bool& value) const {
-	
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
 
-	if(it->second.getType() != XmlRpc::XmlRpcValue::TypeBoolean)
-		return false;
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeString)
+            return false;
 
-	auto tmp = it->second;
-	value = (bool)(tmp);
-	return true;
-}
+        auto tmp = it->second;
+        value = std::string(tmp);
+        return true;
+    }
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, double& value) const {
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
-	
-	if(it->second.getType() != XmlRpc::XmlRpcValue::TypeDouble && it->second.getType() != XmlRpc::XmlRpcValue::TypeInt)
-		return false;
-	
-	auto tmp = it->second;
-	value = it->second.getType() == XmlRpc::XmlRpcValue::TypeInt ? (int)(tmp) : (double)(tmp);
-	return true;
-}
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, bool& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, int& value) const {
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
-	
-	if(it->second.getType() != XmlRpc::XmlRpcValue::TypeInt)
-		return false;
-	
-	auto tmp = it->second;
-	value = tmp;
-	return true;
-}
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeBoolean)
+            return false;
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, unsigned int& value) const {
-	int signed_value;
-	if (!this->getParam(name, signed_value))
-		return false;
-	if (signed_value < 0)
-		return false;
-	value = signed_value;
-	return true;
-}
+        auto tmp = it->second;
+        value = (bool)(tmp);
+        return true;
+    }
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, std::vector<double>& value) const {
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
-	
-	value.clear();
-	
-	if(it->second.getType() != XmlRpc::XmlRpcValue::TypeArray)
-		return false;
-	
-	XmlRpc::XmlRpcValue double_array = it->second;
-	
-	for (auto i = 0; i < double_array.size(); ++i){
-		if(double_array[i].getType() != XmlRpc::XmlRpcValue::TypeDouble && double_array[i].getType() != XmlRpc::XmlRpcValue::TypeInt) {
-	    return false;
-		}
-		
-		double double_value = double_array[i].getType() == XmlRpc::XmlRpcValue::TypeInt ? (int)(double_array[i]) : (double)(double_array[i]);
-		value.push_back(double_value);
-	}
-	
-	return true;
-}
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, double& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, std::vector<std::string>& value) const {
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
-	
-	value.clear();
-	
-	if(it->second.getType() != XmlRpc::XmlRpcValue::TypeArray)
-		return false;
-	
-	XmlRpc::XmlRpcValue string_array = it->second;
-	
-	for (auto i = 0; i < string_array.size(); ++i) {
-		if(string_array[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
-	    	return false;
-	  	}
-	
-	  	value.push_back(string_array[i]);
-	}
-	
-	return true;
-}
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeDouble && it->second.getType() != XmlRpc::XmlRpcValue::TypeInt)
+            return false;
 
-template<typename T>
-bool Filter<T>::getParam(const std::string& name, XmlRpc::XmlRpcValue& value) const {
-	auto it = this->params_.find(name);
-	if (it == this->params_.end())
-		return false;
-	
-	auto tmp = it->second;
-	value = tmp;
-	return true;
-}
+        auto tmp = it->second;
+        value = it->second.getType() == XmlRpc::XmlRpcValue::TypeInt ? (int)(tmp) : (double)(tmp);
+        return true;
+    }
 
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, int& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
+
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeInt)
+            return false;
+
+        auto tmp = it->second;
+        value = tmp;
+        return true;
+    }
+
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, unsigned int& value) const {
+        int signed_value;
+        if (!this->getParam(name, signed_value))
+            return false;
+        if (signed_value < 0)
+            return false;
+        value = signed_value;
+        return true;
+    }
+
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, std::vector<double>& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
+
+        value.clear();
+
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeArray)
+            return false;
+
+        XmlRpc::XmlRpcValue double_array = it->second;
+
+        for (auto i = 0; i < double_array.size(); ++i){
+            if(double_array[i].getType() != XmlRpc::XmlRpcValue::TypeDouble && double_array[i].getType() != XmlRpc::XmlRpcValue::TypeInt) {
+            return false;
+            }
+
+            double double_value = double_array[i].getType() == XmlRpc::XmlRpcValue::TypeInt ? (int)(double_array[i]) : (double)(double_array[i]);
+            value.push_back(double_value);
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, std::vector<std::string>& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
+
+        value.clear();
+
+        if(it->second.getType() != XmlRpc::XmlRpcValue::TypeArray)
+            return false;
+
+        XmlRpc::XmlRpcValue string_array = it->second;
+
+        for (auto i = 0; i < string_array.size(); ++i) {
+            if(string_array[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
+                return false;
+            }
+
+            value.push_back(string_array[i]);
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    bool Filter<T>::getParam(const std::string& name, XmlRpc::XmlRpcValue& value) const {
+        auto it = this->params_.find(name);
+        if (it == this->params_.end())
+            return false;
+
+        auto tmp = it->second;
+        value = tmp;
+        return true;
+    }
 }
 
 #endif
